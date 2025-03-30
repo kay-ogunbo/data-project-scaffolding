@@ -1,0 +1,487 @@
+﻿Table Name,Field,Field Name,Data element,Key,Enforce,Datatype,Length,Decimals,Partition Column,Partition Expression,Partition Scheme,Partition Function,FileGroup
+BSEG,MANDT,Client,MANDT,,,CLNT,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BUKRS,Company Code,BUKRS,X,X,CHAR,4,0,,"BUKRS,BELNR,GJAHR",PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BELNR,Accounting Document Number,BELNR_D,X,X,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,GJAHR,Fiscal Year,GJAHR,X,X,NUMC,4,0,X,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BUZEI,Number of Line Item Within Accounting Document,BUZEI,,,NUMC,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BUZID,Identification of the Line Item,BUZID,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,AUGDT,Clearing Date,AUGDT,,,DATS,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,AUGCP,Clearing Entry Date,AUGCP,,,DATS,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,AUGBL,Document Number of the Clearing Document,AUGBL,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BSCHL,Posting Key,BSCHL,,X,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,KOART,Account Type,KOART,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,UMSKZ,Special G/L Indicator,UMSKZ,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,UMSKS,Special G/L Transaction Type,UMSKS,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ZUMSK,Target Special G/L Indicator,DZUMSK,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SHKZG,Debit/Credit Indicator,SHKZG,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,GSBER,Business Area,GSBER,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PARGB,Trading partner's business area,PARGB,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,MWSKZ,Tax on sales/purchases code,MWSKZ,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,QSSKZ,Withholding Tax Code,QSSKZ,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DMBTR,Amount in Local Currency,DMBTR,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,WRBTR,Amount in document currency,WRBTR,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,KZBTR,Original Reduction Amount in Local Currency,KZBTR_FI,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PSWBT,Amount for Updating in General Ledger,PSWBT,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PSWSL,Update Currency for General Ledger Transaction Figures,PSWSL,,,CUKY,5,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,TXBHW,Original Tax Base Amount in Local Currency,TXBHW,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,TXBFW,Original Tax Base Amount in Document Currency,TXBFW,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,MWSTS,Tax Amount in Local Currency,MWSTS,,X,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,WMWST,Tax amount in document currency,WMWST,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,HWBAS,Tax Base Amount in Local Currency,HWBAS,,X,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,FWBAS,Tax Base Amount in Document Currency,FWBAS,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,HWZUZ,Provision Amount in Local Currency,HWZUZ,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,FWZUZ,Additional Tax in Document Currency,FWZUZ,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SHZUZ,Debit/Credit Addition for Cash Discount,SHZUZ,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,STEKZ,Version Number Component,CHAR2,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,MWART,Tax Type,MWART,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,TXGRP,Group Indicator for Tax Line Items,TXGRP,,,NUMC,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,KTOSL,Transaction Key,KTOSL,,,CHAR,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,QSSHB,Withholding Tax Base Amount,QSSHB,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,KURSR,Hedged Exchange Rate,KURSR,,,DEC,9,5,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,GBETR,Hedged Amount in Foreign Currency,GBETR,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BDIFF,Valuation Difference,BDIFF,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BDIF2,Valuation Difference for the Second Local Currency,BDIF2,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,VALUT,Value date,VALUT,,,DATS,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ZUONR,Assignment Number,DZUONR,,,CHAR,18,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SGTXT,Item Text,SGTXT,,X,CHAR,50,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ZINKZ,Exempted from interest calculation,DZINKZ,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,VBUND,Company ID of trading partner,RASSC,,,CHAR,6,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BEWAR,Transaction Type,RMVCT,,,CHAR,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ALTKT,Group account number,BILKT_SKA1,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,VORGN,Transaction Type for General Ledger,VORGN,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,FDLEV,Planning level,FDLEV,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,FDGRP,Planning Group,FDGRP,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,FDWBT,Planning amount in document currency,FDWBT,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,FDTAG,Planning date,FDTAG,,,DATS,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,FKONT,Financial Budget Item,FIPLS,,,NUMC,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,KOKRS,Controlling Area,KOKRS,,X,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,KOSTL,Cost Center,KOSTL,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PROJN,Old: Project number : No longer used --> PS_POSNR,PROJN,,,CHAR,16,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,AUFNR,Order Number,AUFNR,,,CHAR,12,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,VBELN,Billing Document,VBELN_VF,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,VBEL2,Sales Document,VBELN_VA,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,POSN2,Sales Document Item,POSNR_VA,,,NUMC,6,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ETEN2,Delivery Schedule Line Number,ETENR,,,NUMC,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ANLN1,Main Asset Number,ANLN1,,,CHAR,12,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ANLN2,Asset Subnumber,ANLN2,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ANBWA,Asset Transaction Type,ANBWA,,,CHAR,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BZDAT,Asset value date,BZDAT,,,DATS,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PERNR,Personnel Number,PERNR_D,,,NUMC,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XUMSW,Indicator: Sales-related item ?,XUMSW,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XHRES,Indicator: Resident G/L account?,XHRES,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XKRES,Indicator: Can Line Items Be Displayed by Account?,XKRES,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XOPVW,Indicator: Open item management?,XOPVW,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XCPDD,Indicator: Address and bank data set individually,XCPDD,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XSKST,Indicator: Statistical posting to cost center,XSKST,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XSAUF,Indicator: Posting to order is statistical,XSAUF,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XSPRO,Indicator: Posting to project is statistical,XSPRO,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XSERG,Indicator: Posting to prof.analysis is statistical,XSERG,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XFAKT,Indicator: Billing document update successful ?,XFAKT,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XUMAN,Indicator: Transfer posting from down payment ?,XUMAN,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XANET,Indicator: Down payment in net procedure ?,XANET,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XSKRL,Indicator: Line item not liable to cash discount?,XSKRL,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XINVE,Indicator: Capital Goods Affected?,XINVE,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XPANZ,Display item,XPANZ,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XAUTO,Indicator: Line item automatically created,XAUTO,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XNCOP,Indicator: Items cannot be copied?,XNCOP,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XZAHL,Indicator: Is the posting key used in a payment transaction?,XZAHL,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SAKNR,G/L Account Number,SAKNR,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,HKONT,General Ledger Account,HKONT,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,KUNNR,Customer Number,KUNNR,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,LIFNR,Account Number of Vendor or Creditor,LIFNR,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,FILKD,Account Number of the Branch,FILKD,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XBILK,Indicator: Account is a balance sheet account?,XBILK,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,GVTYP,P&L statement account type,GVTYP,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,HZUON,Assignment Number for Special G/L Accounts,HZUON,,,CHAR,18,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ZFBDT,Baseline Date for Due Date Calculation,DZFBDT,,,DATS,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ZTERM,Terms of Payment Key,DZTERM,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ZBD1T,Cash discount days 1,DZBD1T,,,DEC,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ZBD2T,Cash discount days 2,DZBD2T,,,DEC,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ZBD3T,Net Payment Terms Period,DZBD3T,,,DEC,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ZBD1P,Cash Discount Percentage 1,DZBD1P,,,DEC,5,3,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ZBD2P,Cash Discount Percentage 2,DZBD2P,,,DEC,5,3,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SKFBT,Amount Eligible for Cash Discount in Document Currency,SKFBT,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SKNTO,Cash discount amount in local currency,SKNTO,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,WSKTO,Cash discount amount in document currency,WSKTO,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ZLSCH,Payment Method,SCHZW_BSEG,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ZLSPR,Payment Block Key,DZLSPR,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ZBFIX,Fixed Payment Terms,DZBFIX,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,HBKID,Short Key for a House Bank,HBKID,,,CHAR,5,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BVTYP,Partner Bank Type,BVTYP,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,NEBTR,Net Payment Amount,NEBTR,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,MWSK1,Tax Code for Distribution,MWSKX,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DMBT1,Amount in Local Currency for Tax Distribution,DMBTX,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,WRBT1,Amount in foreign currency for tax breakdown,WRBTX,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,MWSK2,Tax Code for Distribution,MWSKX,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DMBT2,Amount in Local Currency for Tax Distribution,DMBTX,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,WRBT2,Amount in foreign currency for tax breakdown,WRBTX,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,MWSK3,Tax Code for Distribution,MWSKX,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DMBT3,Amount in Local Currency for Tax Distribution,DMBTX,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,WRBT3,Amount in foreign currency for tax breakdown,WRBTX,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,REBZG,Number of the Invoice the Transaction Belongs to,REBZG,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,REBZJ,Fiscal Year of the Relevant Invoice (for Credit Memo),REBZJ,,,NUMC,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,REBZZ,Line Item in the Relevant Invoice,REBZZ,,,NUMC,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,REBZT,Follow-On Document Type,REBZT,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ZOLLT,Customs Tariff Number,DZOLLT,,,CHAR,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ZOLLD,Customs Date,DZOLLD,,,DATS,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,LZBKZ,State Central Bank Indicator,LZBKZ,,,CHAR,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,LANDL,Supplying Country,LANDL,,,CHAR,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DIEKZ,Service Indicator (Foreign Payment),DIEKZ,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SAMNR,Invoice List Number,SAMNR,,,NUMC,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ABPER,Settlement period,ABPER_RF,,,ACCP,6,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,VRSKZ,Insurance indicator,VRSKZ,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,VRSDT,Insurance date,VRSDT,,,DATS,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DISBN,Number of Bill of Exchange Usage Document (Discount Doc.),DISBN,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DISBJ,Fiscal Year of Bill of Exchange Usage Document,DISBJ,,,NUMC,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DISBZ,Line Item within the Bill of Exchange Usage Document,DISBZ,,,NUMC,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,WVERW,Bill of exchange usage type,WVERW,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ANFBN,Document Number of the Bill of Exchange Payment Request,ANFBN,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ANFBJ,Fiscal Year of the Bill of Exchange Payment Request Document,ANFBJ,,,NUMC,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ANFBU,Company Code in Which Bill of Exch.Payment Request Is Posted,ANFBU,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ANFAE,Bill of Exchange Payment Request Due Date,ANFAE,,,DATS,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BLNBT,Base Amount for Determining the Preference Amount,BLNBT,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BLNKZ,Subsidy indicator for determining the reduction rates,BLNKZ,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BLNPZ,Preference Percentage Rate,BLNPZ,,,DEC,7,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,MSCHL,Dunning key,MSCHL,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,MANSP,Dunning block,MANSP,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,MADAT,Last dunned on,MADAT,,,DATS,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,MANST,Dunning level,MAHNS_D,,,NUMC,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,MABER,Dunning Area,MABER,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ESRNR,ISR Subscriber Number,ESRNR,,,CHAR,11,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ESRRE,ISR Reference Number,ESRRE,,,CHAR,27,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ESRPZ,ISR Check Digit,ESRPZ,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,KLIBT,Credit Control Amount,KLIBT,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,QSZNR,Certificate Number of the Withholding Tax Exemption,QSZNR,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,QBSHB,Withholding Tax Amount (in Document Currency),QBSHB,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,QSFBT,Withholding Tax-Exempt Amount (in Document Currency),QSFBT,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,NAVHW,Non-Deductible Input Tax (in Local Currency),NAVHW,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,NAVFW,Non-Deductible Input Tax (in Document Currency),NAVFW,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,MATNR,Material Number,MATNR,,,CHAR,18,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,WERKS,Plant,WERKS_D,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,MENGE,Quantity,MENGE_D,,,QUAN,13,3,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,MEINS,Base Unit of Measure,MEINS,,,UNIT,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ERFMG,Quantity in Unit of Entry,ERFMG,,X,QUAN,13,3,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ERFME,Unit of Entry,ERFME,,,UNIT,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BPMNG,Quantity in Purchase Order Price Unit,BPMNG,,,QUAN,13,3,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BPRME,Order Price Unit (Purchasing),BPRME,,,UNIT,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,EBELN,Purchasing Document Number,EBELN,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,EBELP,Item Number of Purchasing Document,EBELP,,,NUMC,5,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ZEKKN,Sequential Number of Account Assignment,DZEKKN,,,NUMC,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ELIKZ,"""Delivery Completed"" Indicator",ELIKZ,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,VPRSV,Price control indicator,VPRSV,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PEINH,Price Unit,PEINH,,,DEC,5,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BWKEY,Valuation Area,BWKEY,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BWTAR,Valuation Type,BWTAR_D,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BUSTW,Posting string for values,BUSTW,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,REWRT,Invoice Value Entered (in Local Currency),REEWR,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,REWWR,Invoice value in foreign currency,REFWR,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BONFB,Amount Qualifying for Bonus in Local Currency,BONFB,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BUALT,Amount posted in alternative price control,BUALT,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PSALT,Alternative Price Control,PSALT,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,NPREI,New price,NPREI,,,CURR,11,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,TBTKZ,Indicator: subsequent debit/credit,TBTKZ,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SPGRP,Blocking reason: price,SPGRP,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SPGRM,Blocking reason: quantity,SPGRM,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SPGRT,Blocking Reason: Date,SPGRT,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SPGRG,Blocking reason: order price quantity,SPGRG,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SPGRV,Blocking reason: project budget,SPGRV,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SPGRQ,Manual Blocking Reason,SPGRQ,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,STCEG,VAT Registration Number,STCEG,,,CHAR,20,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,EGBLD,Country of Destination for Delivery of Goods,EGBLD,,,CHAR,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,EGLLD,Supplying Country for Delivery of Goods,EGLLD,,,CHAR,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,RSTGR,Reason Code for Payments,RSTGR,,,CHAR,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,RYACQ,Year of acquisition,RYACQ,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,RPACQ,Period of Acquisition,RPACQ,,,NUMC,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,RDIFF,Exchange Rate Gain/Loss Realized,RDIFF,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,RDIF2,Exchange Rate Difference Realized for Second Local Currency,RDIF2,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PRCTR,Profit Center,PRCTR,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XHKOM,Indicator: G/L account assigned manually ?,XHKOM,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,VNAME,Joint Venture,JV_NAME,,,CHAR,6,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,RECID,Recovery Indicator,JV_RECIND,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,EGRUP,Equity group,JV_EGROUP,,,CHAR,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,VPTNR,Partner account number,JV_PART,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,VERTT,Contract Type,RANTYP,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,VERTN,Contract Number,RANL,,,CHAR,13,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,VBEWA,Flow Type,SBEWART,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DEPOT,Securities Account,RLDEPO,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,TXJCD,Tax Jurisdiction,TXJCD,,,CHAR,15,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,IMKEY,Internal Key for Real Estate Object,IMKEY,,,CHAR,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DABRZ,Reference Date for Settlement,DABRBEZ,,,DATS,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,POPTS,Real estate option rate,POPTSATZ,,,DEC,9,6,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,FIPOS,Commitment Item,FIPOS,,,CHAR,14,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,KSTRG,Cost Object,KSTRG,,,CHAR,12,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,NPLNR,Network Number for Account Assignment,NPLNR,,,CHAR,12,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,AUFPL,Task list number for operations in order,AUFPL_CH,,,NUMC,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,APLZL,General counter for order,APLZL_CH,,,NUMC,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PROJK,Work Breakdown Structure Element (WBS Element),PS_PSP_PNR,,,NUMC,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PAOBJNR,Profitability Segment Number (CO-PA),RKEOBJNR,,,NUMC,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PASUBNR,Profitability segment changes (CO-PA),RKESUBNR,,,NUMC,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SPGRS,Blocking Reason: Item Amount,SPGRS,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SPGRC,Block.reason: quality,SPGRC,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BTYPE,Payroll Type,JV_BILIND,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ETYPE,Equity type,JV_ETYPE,,,CHAR,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XEGDR,Indicator: Triangular deal within the EU ?,XEGDR,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,LNRAN,Sequence number of asset line items in fiscal year,LNRAN,,,NUMC,5,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,HRKFT,Origin Group as Subdivision of Cost Element,HRKFT,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DMBE2,Amount in Second Local Currency,DMBE2,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DMBE3,Amount in Third Local Currency,DMBE3,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DMB21,Amount in Second Local Currency for Tax Breakdown,DMB2X,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DMB22,Amount in Second Local Currency for Tax Breakdown,DMB2X,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DMB23,Amount in Second Local Currency for Tax Breakdown,DMB2X,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DMB31,Amount in Third Local Currency for Tax Breakdown,DMB3X,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DMB32,Amount in Third Local Currency for Tax Breakdown,DMB3X,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DMB33,Amount in Third Local Currency for Tax Breakdown,DMB3X,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,MWST2,Tax Amount in Second Local Currency,MWST2,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,MWST3,Tax Amount in Third Local Currency,MWST3,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,NAVH2,Non-Deductible Input Tax in Second Local Currency,NAVH2,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,NAVH3,Non-Deductible Input Tax in Third Local Currency,NAVH3,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SKNT2,Cash Discount Amount in Second Local Currency,SKNT2,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SKNT3,Cash Discount Amount in Third Local Currency,SKNT3,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BDIF3,Valuation Difference for the Third Local Currency,BDIF3,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,RDIF3,Exchange Rate Difference Realized for Third Local Currency,RDIF3,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,HWMET,Method with Which the Local Currency Amount Was Determined,HWMET,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,GLUPM,Update Method for FM - FI-CA Integration,GLUPM,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XRAGL,Indicator: Clearing was Reversed,XRAGL,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,UZAWE,Payment Method Supplement,UZAWE,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,LOKKT,Alternative account number in company code,ALTKT_SKB1,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,FISTL,Funds Center,FISTL,,,CHAR,16,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,GEBER,Fund,BP_GEBER,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,STBUK,Tax Company Code,STBUK,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,TXBH2,Tax Base/Original Tax Base in Second Local Currency,TXBH2,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,TXBH3,Tax Base/Original Tax Base in Third Local Currency,TXBH3,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PPRCT,Partner Profit Center,PPRCTR,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XREF1,Business partner reference key,XREF1,,,CHAR,12,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XREF2,Business partner reference key,XREF2,,,CHAR,12,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,KBLNR,Document Number for Earmarked Funds,KBLNR_FI,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,KBLPOS,Earmarked Funds: Document Item,KBLPOS,,,NUMC,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,STTAX,Tax amount as statistical information in document currency,STTAX,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,FKBER,Functional Area,FKBER_SHORT,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OBZEI,Number of Line Item in Original Document,OBZEI,,,NUMC,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XNEGP,Indicator: Negative posting,XNEGP,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,RFZEI,Payment Card Item,RFZEI_CC,,,NUMC,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,CCBTC,Payment cards: Settlement run,CCBTC,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,KKBER,Credit control area,KKBER,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,EMPFB,Payee/Payer,EMPFB,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XREF3,Reference key for line item,XREF3,,,CHAR,20,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DTWS1,Instruction key 1,DTAT16,,,NUMC,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DTWS2,Instruction key 2,DTAT17,,,NUMC,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DTWS3,Instruction key 3,DTAT18,,,NUMC,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DTWS4,Instruction key 4,DTAT19,,,NUMC,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,GRICD,Activity Code for Gross Income Tax,J_1AGICD_D,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,GRIRG,"Region (State, Province, County)",REGIO,,,CHAR,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,GITYP,Distribution Type for Employment Tax,J_1ADTYP_D,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XPYPR,Indicator: Items from Payment Program Blocked,XPYPR,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,KIDNO,Payment Reference,KIDNO,,,CHAR,30,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,ABSBT,Credit management: Hedged amount,ABSBT,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,IDXSP,Inflation Index,J_1AINDXSP,,,CHAR,5,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,LINFV,Last Adjustment Date,J_1ALINFVL,,,DATS,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,KONTT,Account Assignment Category for Industry Solution,KONTT_FI,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,KONTL,Acct assignment string for industry-specific acct assignmnts,KONTL_FI,,,CHAR,50,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,TXDAT,Date for defining tax rates,TXDAT,,,DATS,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,AGZEI,Clearing Item,AGZEI,,,DEC,5,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PYCUR,Currency for Automatic Payment,PYCUR,,,CUKY,5,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PYAMT,Amount in Payment Currency,PYAMT,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BUPLA,Business Place,BUPLA,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SECCO,Section Code,SECCO,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,LSTAR,Activity Type,LSTAR,,,CHAR,6,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,CESSION_KZ,Accounts Receivable Pledging Indicator,CESSION_KZ,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PRZNR,Business Process,CO_PRZNR,,,CHAR,12,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PPDIFF,Realized Exchange Rate Gain/Loss 1.Loc.Curr.(Part Payments),PPDIFF,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PPDIF2,Realized Exchange Rate Gain/Loss 2.Loc. Curr.(Part Payments),PPDIF2,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PPDIF3,Realized Exchange Rate Gain/Loss 3.Loc.Curr.(Part Payments),PPDIF3,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PENLC1,Penalty charge amount in first local currency,PENALTY1,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PENLC2,Penalty charge amount in second local currency,PENALTY2,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PENLC3,Penalty Charge Amount in Third Local Currency,PENALTY3,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PENFC,Penalty charge amount in document currency,PENALTY,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PENDAYS,Number of days for penalty charge calculation,PDAYS,,,INT4,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PENRC,Reason for late payment,PENRC,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,GRANT_NBR,Grant,GM_GRANT_NBR,,,CHAR,20,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SCTAX,Tax portion FI-CA local currency,SCTAX,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,FKBER_LONG,Functional Area,FKBER,,,CHAR,16,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,GMVKZ,Item is in Execution,FM_GMVKZ,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SRTYPE,Type of Additional Receivable,FM_SRTYPE,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,INTRENO,Internal Real Estate Master Data Code,VVINTRENO,,,CHAR,13,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,MEASURE,Funded Program,FM_MEASURE,,,CHAR,24,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,AUGGJ,Fiscal Year of Clearing Document,AUGGJ,,,NUMC,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PPA_EX_IND,PPA Exclude Indicator,EXCLUDE_FLG,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,DOCLN,Six-Character Posting Item for Ledger,DOCLN6,,,CHAR,6,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,SEGMENT,Segment for Segmental Reporting,FB_SEGMENT,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PSEGMENT,Partner Segment for Segmental Reporting,FB_PSEGMENT,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PFKBER,Partner Functional Area,SFKBER,,,CHAR,16,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,HKTID,ID for account details,HKTID,,,CHAR,5,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,KSTAR,Cost Element,KSTAR,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XLGCLR,Clearing Specific to Ledger Groups,XLGCLR,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,TAXPS,Tax document item number,TAX_POSNR,,,NUMC,6,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PAYS_PROV,Payment Service Provider,COM_WEC_PAYMENT_SRV_PROVIDER,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PAYS_TRAN,Payment Reference of Payment Service Provider,FPS_TRANSACTION,,,CHAR,35,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,MNDID,Unique Referene to Mandate per Payment Recipient,SEPA_MNDID,,,CHAR,35,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,XFRGE_BSEG,Payment Is Released,XFRGE_BSEG,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,RE_BUKRS,Cash Ledger: Company Code for Expense/Revenue,FAGL_RE_BUKRS,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,RE_ACCOUNT,Cash Ledger: Expense or Revenue Account,FAGL_RE_ACCOUNT,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PGEBER,Partner Fund,FM_PFUND,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PGRANT_NBR,Partner Grant,GM_GRANT_PARTNER,,,CHAR,20,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,BUDGET_PD,FM: Budget Period,FM_BUDGET_PERIOD,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PBUDGET_PD,FM: Partner Budget Period,FM_PBUDGET_PERIOD,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PEROP_BEG,Billing Period of Performance Start Date,FM_PEROP_FI_LOW,,,DATS,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PEROP_END,Billing Period of Performance End Date,FM_PEROP_FI_HIGH,,,DATS,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,FASTPAY,PPA Fast Pay Indicator,FMFG_FASTPAY_FLG,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,IGNR_IVREF,FMFG: Ignore the invoice reference during FI doc splitting,FMFG_IGNORE_INV_REF,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,FMXDOCNR,FM Reference Document Number,FM_XDOCNR,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,FMXYEAR,FM Reference Year,FM_XYEAR,,,NUMC,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,FMXDOCLN,FM Reference Line Item,FM_XDOCLN,,,NUMC,6,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,FMXZEKKN,FM Reference Sequence Account Assignment,FM_XZEKKN,,,NUMC,5,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,PRODPER,Production Month (Date to find period and year),JV_PRODPER,,,DATS,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OITAXFROM,Excise duty tax key for 'from' location,OIH_TAXFRO,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OITAXTO,Excise duty tax key for 'to' location,OIH_TAXTO,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIFULTAX,Excise duty tax value at the full rate,OIH_FULTAX,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIHANTYPE,Excise Duty Handling Type,OIH_HANTYP,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OITAXGRP,Excise Duty Group,OIH_TAXGRP,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIPRICIE,ED pricing: external (indicator),OIH_PRICIE,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIINVREC,Indicator whether ED pricing is external (not used?),OIH_INVREC,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OITXVAL0,Excise duty tax value 0,OIH_TXVAL0,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OITXVAL1,Excise duty tax value 1,OIH_TXVAL1,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OITXVAL2,Excise duty tax value 2,OIH_TXVAL2,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OITXVAL3,Excise duty tax value 3,OIH_TXVAL3,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OITXVAL4,Excise duty tax value 4,OIH_TXVAL4,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OITXVAL5,Excise duty tax value 5,OIH_TXVAL5,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OITXVAL6,Excise duty tax value 6,OIH_TXVAL6,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIOILCON,Oil content in a material as a percentage,OIH_OILCON,,,DEC,5,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OITAXCON,Excise duty tax from pricing conditions,OIH_TAXCON,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OITAXVAL,Excise duty value in material inventory account,OIH_TAXVAL,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIOILCON2,Oil content of a material as a percentage (2),OIH_OILCN2,,,DEC,5,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIUOMQT,Base quantity for excise duty rate (e.g.per 1 or 100 UoM),OIH_UOMQT,,,UNIT,3,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OITAXQT,Excise duty tax quantity in STBME,OIH_TAXQT,,,QUAN,13,3,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIFUTQT,Future tax quantity,OIH_FUTQT,,,QUAN,13,3,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIFUTTX,Future tax value,OIH_FUTTX,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIFUTDT,Future tax date,OIH_FUTDT,,,DATS,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIFUTQT2,Future tax quantity 2,OIH_FUTQT2,,,QUAN,13,3,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIFUTTX2,Future tax value 2,OIH_FUTTX2,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIFUTDT2,Future tax date 2,OIH_FUTDT2,,,DATS,8,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OITAXGRP2,Excise Duty Group,OIH_TAXGRP,,,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OICIMAP,Change internal moving average price,OIA_CIMAP,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIHANTYP,Excise Duty Handling Type,OIH_HANTYP,,X,CHAR,2,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIVATH,Amount in Local Currency,DMBTR,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIVATF,Amount in document currency,WRBTR,,,CURR,13,2,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OINETCYC,Netting cycle (FI blocking indicator),OIA_NETCYC,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIA_IPMVAT,VAT on internally-posted material,OIA_IPMVAT,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIEXGNUM,Exchange agreement number,OIA_EXGNUM,,,CHAR,10,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIEXGTYP,Exchange type,OIA_EXGTYP,,,CHAR,4,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OINEGPSTG,Negative posting line (exchange fees),OIA_NGPSTL,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,RECID_MAN,,,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIPOSTZERO,Post zero amounts,OIH_PSTZRO,,,CHAR,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BSEG,OIINVCYC,Invoice cycle,OIA_INVCYC,,,NUMC,1,0,,,PS_BSEG,PF_BSEG,FG_BSEG
+BKPF,MANDT,Client,MANDT,,,CLNT,3,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,BUKRS,Company Code,BUKRS,X,,CHAR,4,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,BELNR,Accounting Document Number,BELNR_D,X,,CHAR,10,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,GJAHR,Fiscal Year,GJAHR,X,,NUMC,4,0,X,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,BLART,Document Type,BLART,,,CHAR,2,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,BLDAT,Document Date in Document,BLDAT,,,DATS,8,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,BUDAT,Posting Date in the Document,BUDAT,,,DATS,8,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,MONAT,Fiscal Period,MONAT,,,NUMC,2,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,CPUDT,Day On Which Accounting Document Was Entered,CPUDT,,,DATS,8,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,CPUTM,Time of Entry,CPUTM,,,TIMS,6,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,AEDAT,Date of the Last Document Change by Transaction,AEDAT_BKPF,,,DATS,8,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,UPDDT,Date of the Last Document Update,UPDDT,,,DATS,8,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,WWERT,Translation Date,WWERT_D,,,DATS,8,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,USNAM,User name,USNAM,,,CHAR,12,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,TCODE,Transaction Code,TCODE,,,CHAR,20,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,BVORG,Number of Cross-Company Code Posting Transaction,BVORG,,,CHAR,16,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,XBLNR,Reference Document Number,XBLNR1,,,CHAR,16,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,DBBLG,Recurring Entry Document Number,DBBLG,,,CHAR,10,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,STBLG,Reverse Document Number,STBLG,,,CHAR,10,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,STJAH,Reverse document fiscal year,STJAH,,,NUMC,4,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,BKTXT,Document Header Text,BKTXT,,,CHAR,25,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,WAERS,Currency Key,WAERS,,,CUKY,5,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,KURSF,Exchange rate,KURSF,,,DEC,9,5,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,KZWRS,Currency Key for the Group Currency,KZWRS,,,CUKY,5,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,KZKRS,Group Currency Exchange Rate,KZKRS,,,DEC,9,5,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,BSTAT,Document Status,BSTAT_D,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,XNETB,Indicator: Document posted net ?,XNETB,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,FRATH,Unplanned delivery costs,FRATH,,,CURR,13,2,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,XRUEB,Indicator: Document is posted to a previous period,XRUEB,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,GLVOR,Business Transaction,GLVOR,,,CHAR,4,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,GRPID,Batch Input Session Name,GRPID_BKPF,,,CHAR,12,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,DOKID,Document Name in the Archive System,DOKID_BKPF,,,CHAR,40,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,ARCID,Extract ID Document Header,EXTID_BKPF,,,CHAR,10,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,IBLAR,Internal Document Type for Document Control,IBLAR,,,CHAR,2,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,AWTYP,Reference Transaction,AWTYP,,,CHAR,5,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,AWKEY,Reference Key,AWKEY,,,CHAR,20,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,FIKRS,Financial Management Area,FIKRS,,,CHAR,4,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,HWAER,Local Currency,HWAER,,,CUKY,5,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,HWAE2,Currency Key of Second Local Currency,HWAE2,,,CUKY,5,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,HWAE3,Currency Key of Third Local Currency,HWAE3,,,CUKY,5,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,KURS2,Exchange Rate for the Second Local Currency,KURS2,,,DEC,9,5,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,KURS3,Exchange Rate for the Third Local Currency,KURS3,,,DEC,9,5,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,BASW2,Source Currency for Currency Translation,CURSR,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,BASW3,Source Currency for Currency Translation,CURSR,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,UMRD2,Translation Date Type for Second Local Currency,UMRD2,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,UMRD3,Translation Date Type for Third Local Currency,UMRD3,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,XSTOV,Indicator: Document is flagged for reversal,XSTOV,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,STODT,Planned Date for the Reverse Posting,STODT,,,DATS,8,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,XMWST,Calculate tax automatically,XMWST,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,CURT2,Currency Type of Second Local Currency,CURT2,,,CHAR,2,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,CURT3,Currency Type of Third Local Currency,CURT3,,,CHAR,2,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,KUTY2,Exchange Rate Type,KURST,,,CHAR,4,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,KUTY3,Exchange Rate Type,KURST,,,CHAR,4,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,XSNET,G/L account amounts entered exclude tax,XSNET,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,AUSBK,Source Company Code,AUSBK,,,CHAR,4,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,XUSVR,Indicator: US taxes changed at detail level ?,XUSVR_BKPF,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,DUEFL,Status of Data Transfer into Subsequent Release,DUEFL_BKPF,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,AWSYS,Logical System,LOGSYSTEM,,,CHAR,10,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,TXKRS,Exchange Rate for Taxes,TXKRS_BKPF,,,DEC,9,5,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,LOTKZ,Lot Number for Requests,PSO_LOTKZ,,,CHAR,10,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,XWVOF,Indicator: Customer bill of exchange payment before due date,XWVOF,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,STGRD,Reason for Reversal,STGRD,,,CHAR,2,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,PPNAM,Name of User Who Parked this Document,PPNAM,,,CHAR,12,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,BRNCH,Branch Number,J_1ABRNCH,,,CHAR,4,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,NUMPG,Number of pages of invoice,J_1ANOPG,,,NUMC,3,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,ADISC,Indicator: entry represents a discount document,J_1ADISC,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,XREF1_HD,Reference Key 1 Internal for Document Header,XREF1_HD,,,CHAR,20,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,XREF2_HD,Reference Key 2 Internal for Document Header,XREF2_HD,,,CHAR,20,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,XREVERSAL,Specifies whether doc. is reversal doc. or reversed doc.,XREVERSAL,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,REINDAT,Invoice Receipt Date,REINDAT,,,DATS,8,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,RLDNR,Ledger in General Ledger Accounting,FAGL_RLDNR,,,CHAR,2,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,LDGRP,Ledger Group,FAGL_LDGRP,,,CHAR,4,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,PROPMANO,Real Estate Management Mandate,RE_MANDAT,,,CHAR,13,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,XBLNR_ALT,Alternative Reference Number,XBLNR_ALT,,,CHAR,26,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,VATDATE,Tax Reporting Date,VATDATE,,,DATS,8,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,DOCCAT,Classification of an FI Document,DOCUMENT_CATEGORY,,,CHAR,6,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,XSPLIT,FI Document Originates from Split Posting (Indicator),SPLIT_POSTING,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,CASH_ALLOC,Cash-Relevant Document,FAGL_CASH_ALLOC,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,FOLLOW_ON,Follow-on document indicator,FAGL_FOLLOW_ON,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,XREORG,Doc. Contains Open Item that Was Transferred During Reorg.,FAGL_R_XDOC_REORG,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,SUBSET,Defines subset of components for the FI/CO interface,ACC_SUBSET,,,CHAR,4,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,KURST,Exchange Rate Type,KURST,,,CHAR,4,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,KURSX,Market Data Exchange Rate,GLE_FXR_DTE_RATEX28,,,DEC,28,14,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,KUR2X,Market Data Exchange Rate 2,GLE_FXR_DTE_RATE2X28,,,DEC,28,14,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,KUR3X,Market Data Exchange Rate 3,GLE_FXR_DTE_RATE3X28,,,DEC,28,14,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,XMCA,Document Originates from Multi Currency Accounting,GLE_DTE_MCA_XMCA,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,/SAPF15/STATUS,,/SAPF15/STATUS,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,PSOTY,Document category payment requests,PSOTY_D,,,CHAR,2,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,PSOAK,Reason,PSOAK,,,CHAR,10,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,PSOKS,Region,PSOKS,,,CHAR,10,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,PSOSG,Reason for reversal - IS-PS requests,PSOSG,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,PSOFN,IS-PS: File number,PSOFN,,,CHAR,30,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,INTFORM,Interest Formula,FM_INTFORM,,,CHAR,4,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,INTDATE,Interest Calc. Date,FM_INTDATE,,,DATS,8,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,PSOBT,Posting Day,PSOBT,,,DATS,8,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,PSOZL,Actual posting,PSOZL,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,PSODT,Changed On,AEDAT,,,DATS,8,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,PSOTM,Last changed at,PSOTM,,,TIMS,6,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,FM_UMART,Type of Payment Transfer,FM_UMART,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,CCINS,Payment cards: Card type,CCINS_30F,,,CHAR,4,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,CCNUM,Payment cards: Card number,CCNUM_30F,,,CHAR,25,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,SSBLK,Payment Statistical Sampling Block,SSBLK,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,BATCH,Lot Number for Documents,LOTKZ,,,CHAR,10,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,SNAME,User Name,UNAME,,,CHAR,12,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,SAMPLED,Sampled Invoice by Payment Certification,SAMPLED,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,EXCLUDE_FLAG,PPA Exclude Indicator,EXCLUDE_FLG,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,BLIND,Budgetary Ledger Indicator,FM_BLIND,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,OFFSET_STATUS,Treasury Offset Status,FMFG_OFFSET_STATUS,,,CHAR,2,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,OFFSET_REFER_DAT,Date Record Referred to Treasury,FMFG_REFERRED_OFFSET_DAT,,,DATS,8,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,PENRC,Reason for late payment,PENRC,,,CHAR,2,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,KNUMV,Number of the document condition,KNUMV,,,CHAR,10,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,OINETNUM,Exchange - netting document number,OIA_NETNUM,,,CHAR,10,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,OINJAHR,Fiscal Year,GJAHR,,,NUMC,4,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,OININD,Movement-based netting indicator,OIA_NET,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
+BKPF,RECHN,Indicator: post invoice,XRECH,,,CHAR,1,0,,,PS_BKPF,PF_BKPF,FG_BKPF
