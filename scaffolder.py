@@ -156,10 +156,10 @@ def process_table_data(csv_path, sql_mapping):
                     'partition_type': None
                 }
 
-            field = row['Field'].strip()
+            field = row['Field Name'].strip()
             dtype = row['Datatype'].strip().lower()
             length = row['Length'].strip()
-            decimals = row['Decimals'].strip()
+            decimals = row['Decimal Places'].strip()
             enforce = row['Enforce'].strip().upper() == 'X'
             is_partition = row['Partition Column'].strip().upper() == 'X'
 
