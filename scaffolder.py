@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 
 # Configuration constants
 REQUIRED_CSV_COLUMNS = [
-    'Table Name', 'Field', 'Datatype', 'Length',
-    'Decimals', 'Key', 'Enforce', 'Partition Column'
+    'Table Name', 'Field Name', 'Datatype', 'Length',
+    'Decimal Places', 'Key', 'Enforce', 'Partition Column'
 ]
 
 # Escaped identifier for special characters in column names
