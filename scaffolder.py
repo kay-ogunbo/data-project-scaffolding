@@ -11,6 +11,17 @@ REQUIRED_CSV_COLUMNS = [
     'Decimals', 'Key', 'Enforce', 'Partition Column'
 ]
 
+# Escaped identifier for special characters in column names
+def quote_identifier(db_type, identifier):
+    """Properly quote identifiers for different databases"""
+    cleaned = identifier.strip()
+    if db_type == 'postgresql':
+        return f'"{cleaned}"'
+    elif db_type == 'mysql':
+        return f'`{cleaned}`'
+    elif db_type == 'mssql':
+        return f'[{cleaned}]'
+    return cleaned
 
 def prompt_user():
     """Collect user configuration through interactive prompts"""
@@ -119,8 +130,7 @@ def read_sql_mapping(mapping_path):
 
 
 def process_table_data(csv_path, sql_mapping):
-    """Process CSV data with lenient length/decimal handling"""
-    # Define parameter requirements for SQL types
+    """Process CSV data with special character handling"""
     PARAMETERIZED_TYPES = {
         'NVARCHAR': ['length'],
         'VARCHAR': ['length'],
@@ -146,7 +156,6 @@ def process_table_data(csv_path, sql_mapping):
                     'partition_type': None
                 }
 
-            # Process field definition
             field = row['Field'].strip()
             dtype = row['Datatype'].strip().lower()
             length = row['Length'].strip()
@@ -154,19 +163,15 @@ def process_table_data(csv_path, sql_mapping):
             enforce = row['Enforce'].strip().upper() == 'X'
             is_partition = row['Partition Column'].strip().upper() == 'X'
 
-            # Validate data type exists
             if dtype not in sql_mapping:
                 raise ValueError(
                     f"Undefined data type '{dtype}' for field '{field}'")
 
             base_type = sql_mapping[dtype].upper().split('(')[0].strip()
-            type_params = []
 
-            # Handle parameters only for specified types
             if base_type in PARAMETERIZED_TYPES:
                 required_params = PARAMETERIZED_TYPES[base_type]
 
-                # Validate required parameters
                 if 'length' in required_params and not length:
                     raise ValueError(
                         f"Missing length for {field} ({base_type})")
@@ -174,7 +179,6 @@ def process_table_data(csv_path, sql_mapping):
                     raise ValueError(
                         f"Missing decimals for {field} ({base_type})")
 
-                # Build parameters
                 params = []
                 if 'length' in required_params:
                     params.append(length)
@@ -183,19 +187,20 @@ def process_table_data(csv_path, sql_mapping):
 
                 sql_type = f"{base_type}({','.join(params)})" if params else base_type
             else:
-                # For non-parameterized types, ignore length/decimals
                 sql_type = base_type
 
-            # Build column definition
-            col_def = f"{field} {sql_type}"
-            if enforce:
-                col_def += " NOT NULL"
+            # Store as dictionary instead of string
+            col_def = {
+                'field': field,
+                'type': sql_type,
+                'enforce': enforce
+            }
 
             tables[table_name]['columns'].append(col_def)
 
-            # Handle keys and partitioning
             if row['Key'].strip().upper() == 'X':
                 tables[table_name]['keys'].append(field)
+
             if is_partition:
                 if tables[table_name]['partition']:
                     raise ValueError(
@@ -203,21 +208,15 @@ def process_table_data(csv_path, sql_mapping):
                 tables[table_name]['partition'] = field
                 tables[table_name]['partition_type'] = base_type
 
-    # Add primary key constraints
-    for table, data in tables.items():
-        if data['keys']:
-            data['columns'].append(f"PRIMARY KEY ({', '.join(data['keys'])})")
-
     return tables
 
 
 def generate_sql_commands(config, tables):
-    """Generate database-specific SQL commands"""
+    """Generate database-specific SQL commands with proper quoting"""
     db_type = config['database']
     db_name = config['database_name']
     commands = []
 
-    # Database creation
     if db_type == 'mssql':
         commands.extend([
             f"USE master",
@@ -237,7 +236,6 @@ def generate_sql_commands(config, tables):
             f"CREATE DATABASE {db_name}"
         ])
 
-    # Schema/table creation
     for layer in config.get('medallion_layers', []):
         if db_type == 'postgresql':
             commands.append(f"CREATE SCHEMA IF NOT EXISTS {layer};")
@@ -245,32 +243,42 @@ def generate_sql_commands(config, tables):
             commands.append(f"CREATE SCHEMA {layer};")
 
         for table, data in tables.items():
-            # Table creation
-            columns = ",\n    ".join(data['columns'])
+            columns = []
+            for col in data['columns']:
+                quoted_field = quote_identifier(db_type, col['field'])
+                col_def = f"{quoted_field} {col['type']}"
+                if col['enforce']:
+                    col_def += " NOT NULL"
+                columns.append(col_def)
+
+            if data['keys']:
+                quoted_keys = [quote_identifier(
+                    db_type, k) for k in data['keys']]
+                columns.append(f"PRIMARY KEY ({', '.join(quoted_keys)})")
+
+            columns_str = ",\n    ".join(columns)
             drop_stmt = (f"IF OBJECT_ID('{layer}.{table}', 'U') IS NOT NULL DROP TABLE {layer}.{table};"
                          if db_type == 'mssql' else f"DROP TABLE IF EXISTS {layer}.{table};")
 
-            create_stmt = f"CREATE TABLE {layer}.{table} (\n    {columns}\n)"
+            create_stmt = f"CREATE TABLE {layer}.{table} (\n    {columns_str}\n)"
 
             if db_type == 'mssql' and data['partition'] and layer != 'bronze':
-                # Partitioning implementation
+                partition_field = quote_identifier(db_type, data['partition'])
                 func_name = f"pf_{layer}_{table}"
                 scheme_name = f"ps_{layer}_{table}"
                 commands.extend([
                     f"CREATE PARTITION FUNCTION {func_name} ({data['partition_type']}) AS RANGE RIGHT FOR VALUES ('2023-01-01')",
                     f"CREATE PARTITION SCHEME {scheme_name} AS PARTITION {func_name} ALL TO ([PRIMARY])",
                     f"DROP TABLE {layer}.{table}",
-                    f"CREATE TABLE {layer}.{table} (\n    {columns}\n) ON {scheme_name}({data['partition']})"
+                    f"CREATE TABLE {layer}.{table} (\n    {columns_str}\n) ON {scheme_name}({partition_field})"
                 ])
             else:
                 commands.extend([drop_stmt, create_stmt])
 
-    # Add GO commands for MSSQL
     if config['mssql_go']:
         commands = [f"{cmd}\nGO" for cmd in commands]
 
     return "\n".join(commands)
-
 
 def generate_docker_config(project_path, config):
     """Generate Docker-related files in project directory"""
