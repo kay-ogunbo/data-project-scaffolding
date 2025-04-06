@@ -11,17 +11,18 @@ REQUIRED_CSV_COLUMNS = [
     'Decimal Places', 'Key', 'Enforce', 'Partition Column'
 ]
 
-# Escaped identifier for special characters in column names
+# Escaped identifier for special character
 def quote_identifier(db_type, identifier):
-    """Properly quote identifiers for different databases"""
-    cleaned = identifier.strip()
+    """Properly quote identifiers including database names"""
+    # First remove any existing quotes
+    stripped = identifier.strip('"`[]')  # NEW: Sanitization step
     if db_type == 'postgresql':
-        return f'"{cleaned}"'
+        return f'"{stripped}"'
     elif db_type == 'mysql':
-        return f'`{cleaned}`'
+        return f'`{stripped}`'
     elif db_type == 'mssql':
-        return f'[{cleaned}]'
-    return cleaned
+        return f'[{stripped}]'
+    return stripped
 
 def prompt_user():
     """Collect user configuration through interactive prompts"""
@@ -30,6 +31,7 @@ def prompt_user():
         'project_location': Path.cwd(),
         'database': None,
         'database_name': None,
+        'source_system': None,
         'csv_path': None,
         'sql_mapping_path': None,
         'docker': False,
@@ -58,6 +60,11 @@ def prompt_user():
     if db_choice in {'mysql', 'postgresql', 'mssql'}:
         config['database'] = db_choice
         config['database_name'] = input("Database name: ").strip()
+
+        while not config['source_system']:
+            config['source_system'] = input("Source system name: ").strip()
+            if not config['source_system']:
+                print("Source system is required!")
 
         while True:
             config['csv_path'] = input("CSV mapping file path: ").strip()
@@ -212,38 +219,64 @@ def process_table_data(csv_path, sql_mapping):
 
 
 def generate_sql_commands(config, tables):
-    """Generate database-specific SQL commands with proper quoting"""
     db_type = config['database']
-    db_name = config['database_name']
+    quoted_db = quote_identifier(db_type, config['database_name'])
+    quoted_source = quote_identifier(db_type, config['source_system'])
     commands = []
 
+    # Database creation
     if db_type == 'mssql':
         commands.extend([
             f"USE master",
-            f"DROP DATABASE IF EXISTS {db_name}",
-            f"CREATE DATABASE {db_name}",
-            f"USE {db_name}"
+            f"DROP DATABASE IF EXISTS {quoted_db}",
+            f"CREATE DATABASE {quoted_db}",
+            f"USE {quoted_db}"
         ])
     elif db_type == 'mysql':
         commands.extend([
-            f"DROP DATABASE IF EXISTS `{db_name}`",
-            f"CREATE DATABASE `{db_name}`",
-            f"USE `{db_name}`"
+            f"DROP DATABASE IF EXISTS {quoted_db}",
+            f"CREATE DATABASE {quoted_db}",
+            f"USE {quoted_db}"
         ])
     elif db_type == 'postgresql':
         commands.extend([
-            f"DROP DATABASE IF EXISTS {db_name}",
-            f"CREATE DATABASE {db_name}"
+            f"DROP DATABASE IF EXISTS {quoted_db}",
+            f"CREATE DATABASE {quoted_db}"
         ])
 
     for layer in config.get('medallion_layers', []):
-        if db_type == 'postgresql':
-            commands.append(f"CREATE SCHEMA IF NOT EXISTS {layer};")
-        elif db_type == 'mssql':
-            commands.append(f"CREATE SCHEMA {layer};")
+        quoted_layer = quote_identifier(db_type, layer)
 
+        # Schema creation
+        if db_type == 'postgresql':
+            commands.append(
+                f"CREATE SCHEMA IF NOT EXISTS {quoted_layer};")
+        elif db_type == 'mssql':
+            commands.append(
+                f"CREATE SCHEMA {quoted_layer};")
+
+        # Table creation
         for table, data in tables.items():
+            quoted_table = quote_identifier(db_type, table)
+            full_table_name = f"{quoted_layer}.{quoted_source}.{quoted_table}"
+
             columns = []
+            # Add surrogate key
+            surrogate_column = f"{table}_ID"
+            quoted_surrogate = quote_identifier(db_type, surrogate_column)
+            unique_surrogate_name = f"UQ_{table}_{surrogate_column}"[:64]
+
+            if db_type == 'mssql':
+                columns.append(
+                    f"{quoted_surrogate} INT IDENTITY(1,1) NOT NULL")
+            elif db_type == 'mysql':
+                columns.append(
+                    f"{quoted_surrogate} INT AUTO_INCREMENT NOT NULL")
+            elif db_type == 'postgresql':
+                columns.append(f"{quoted_surrogate} SERIAL NOT NULL")
+
+
+            # Process regular columns
             for col in data['columns']:
                 quoted_field = quote_identifier(db_type, col['field'])
                 col_def = f"{quoted_field} {col['type']}"
@@ -251,34 +284,49 @@ def generate_sql_commands(config, tables):
                     col_def += " NOT NULL"
                 columns.append(col_def)
 
+            # Add original primary key
             if data['keys']:
                 quoted_keys = [quote_identifier(
                     db_type, k) for k in data['keys']]
                 columns.append(f"PRIMARY KEY ({', '.join(quoted_keys)})")
 
-            columns_str = ",\n    ".join(columns)
-            drop_stmt = (f"IF OBJECT_ID('{layer}.{table}', 'U') IS NOT NULL DROP TABLE {layer}.{table};"
-                         if db_type == 'mssql' else f"DROP TABLE IF EXISTS {layer}.{table};")
+            # Append surrogate to the created table
+            columns.append(
+                f"CONSTRAINT {unique_surrogate_name} UNIQUE ({quoted_surrogate})")
 
-            create_stmt = f"CREATE TABLE {layer}.{table} (\n    {columns_str}\n)"
-
+            # Partitioning
+            partition_clause = ""
             if db_type == 'mssql' and data['partition'] and layer != 'bronze':
                 partition_field = quote_identifier(db_type, data['partition'])
-                func_name = f"pf_{layer}_{table}"
-                scheme_name = f"ps_{layer}_{table}"
+                func_name = f"pf_{layer}_{config['source_system']}_{table}"
+                scheme_name = f"ps_{layer}_{config['source_system']}_{table}"
+                partition_clause = f" ON {scheme_name}({partition_field})"
                 commands.extend([
-                    f"CREATE PARTITION FUNCTION {func_name} ({data['partition_type']}) AS RANGE RIGHT FOR VALUES ('2023-01-01')",
-                    f"CREATE PARTITION SCHEME {scheme_name} AS PARTITION {func_name} ALL TO ([PRIMARY])",
-                    f"DROP TABLE {layer}.{table}",
-                    f"CREATE TABLE {layer}.{table} (\n    {columns_str}\n) ON {scheme_name}({partition_field})"
+                    f"CREATE PARTITION FUNCTION {func_name} ({data['partition_type']}) "
+                    f"AS RANGE RIGHT FOR VALUES ('2023-01-01')",
+                    f"CREATE PARTITION SCHEME {scheme_name} "
+                    f"AS PARTITION {func_name} ALL TO ([PRIMARY])"
                 ])
-            else:
-                commands.extend([drop_stmt, create_stmt])
+
+            # Build final statement
+            columns_str = ",\n    ".join(columns)
+            drop_stmt = (
+                f"IF OBJECT_ID('{full_table_name}', 'U') IS NOT NULL "
+                f"DROP TABLE {full_table_name};"
+                if db_type == 'mssql'
+                else f"DROP TABLE IF EXISTS {full_table_name};"
+            )
+            create_stmt = f"CREATE TABLE {full_table_name} (\n    {columns_str}\n){partition_clause}"
+
+            commands.extend([drop_stmt, create_stmt])
 
     if config['mssql_go']:
-        commands = [f"{cmd}\nGO" for cmd in commands]
+        commands = [f"{cmd}\nGO" if not cmd.endswith(
+            'GO') else cmd for cmd in commands]
 
     return "\n".join(commands)
+
+
 
 def generate_docker_config(project_path, config):
     """Generate Docker-related files in project directory"""
