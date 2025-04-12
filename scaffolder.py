@@ -252,13 +252,19 @@ def generate_sql_commands(config, tables):
             commands.append(
                 f"CREATE SCHEMA IF NOT EXISTS {quoted_layer};")
         elif db_type == 'mssql':
+            commands.append(f"-- Drop and recreate schema: {quoted_layer}")
+            commands.append(
+                f"IF EXISTS (SELECT * FROM sys.schemas WHERE name = '{quoted_layer}')")
+            commands.append(f"    DROP SCHEMA {quoted_layer};")
             commands.append(
                 f"CREATE SCHEMA {quoted_layer};")
+
+
 
         # Table creation
         for table, data in tables.items():
             quoted_table = quote_identifier(db_type, table)
-            full_table_name = f"{quoted_layer}.{quoted_source}.{quoted_table}"
+            full_table_name = f"{quoted_layer}.{quoted_table}"
 
             columns = []
             # Add surrogate key
@@ -404,32 +410,89 @@ def create_project_structure(project_path, config):
         (project_path / directory).mkdir(parents=True, exist_ok=True)
 
 
+# def setup_environment(project_path, config):
+#     """Create environment setup scripts in project directory"""
+#     env_cmds = {
+#         'conda': [
+#             f"conda create --name {config['project_name']}_env python=3.9 -y",
+#             f"conda activate {config['project_name']}_env"
+#         ],
+#         'pip': [
+#             f"python -m venv {config['project_name']}_env",
+#             f"source {config['project_name']}_env/bin/activate" if 'mac' in config['os_scripts'] else f"{config['project_name']}_env\Scripts\activate"
+#         ]
+#     }
+
+#     for os_type in config['os_scripts']:
+#         if os_type == 'mac':
+#             setup_path = project_path / "setup.sh"
+#             with open(setup_path, 'w') as f:
+#                 f.write("#!/bin/bash\n" +
+#                         "\n".join(env_cmds[config['python_env']]))
+#             os.chmod(setup_path, 0o755)
+#         elif os_type == 'win':
+#             setup_path = project_path / "setup.bat"
+#             with open(setup_path, 'w') as f:
+#                 f.write("@echo off\n" +
+#                         "\r\n".join(env_cmds[config['python_env']]))
+
 def setup_environment(project_path, config):
-    """Create environment setup scripts in project directory"""
-    env_cmds = {
-        'conda': [
-            f"conda create --name {config['project_name']}_env python=3.9 -y",
-            f"conda activate {config['project_name']}_env"
-        ],
-        'pip': [
-            f"python -m venv {config['project_name']}_env",
-            f"source {config['project_name']}_env/bin/activate" if 'mac' in config['os_scripts'] else f"{config['project_name']}_env\Scripts\activate"
-        ]
+    """Create OS-specific environment setup scripts"""
+    env_name = f"{config['project_name']}_env"
+
+    # Environment commands by OS and package manager
+    env_commands = {
+        'pip': {
+            'mac': [
+                f"python3 -m venv {env_name}",
+                f"source {env_name}/bin/activate",
+                "pip install --upgrade pip",
+                "if [ -f requirements.txt ]; then pip install -r requirements.txt; fi"
+            ],
+            'win': [
+                f"python -m venv {env_name}",
+                f"call {env_name}\\Scripts\\activate.bat",
+                "python -m pip install --upgrade pip",
+                "if exist requirements.txt pip install -r requirements.txt"
+            ]
+        },
+        'conda': {
+            'mac': [
+                f"conda create --name {env_name} python=3.9 -y",
+                f"conda activate {env_name}",
+                "conda install pip -y",
+                "pip install -r requirements.txt"
+            ],
+            'win': [
+                f"conda create --name {env_name} python=3.9 -y",
+                f"conda activate {env_name}",
+                "conda install pip -y",
+                "pip install -r requirements.txt"
+            ]
+        }
     }
 
     for os_type in config['os_scripts']:
         if os_type == 'mac':
             setup_path = project_path / "setup.sh"
             with open(setup_path, 'w') as f:
-                f.write("#!/bin/bash\n" +
-                        "\n".join(env_cmds[config['python_env']]))
+                f.write("#!/bin/bash\n")
+                cmds = env_commands[config['python_env']]['mac']
+                f.write("\n".join(cmds))
+                f.write(
+                    '\necho "Environment ready! Run: source {}/bin/activate"'.format(env_name))
             os.chmod(setup_path, 0o755)
+
         elif os_type == 'win':
             setup_path = project_path / "setup.bat"
             with open(setup_path, 'w') as f:
-                f.write("@echo off\n" +
-                        "\r\n".join(env_cmds[config['python_env']]))
-
+                f.write("@echo off\n")
+                cmds = env_commands[config['python_env']]['win']
+                f.write("\r\n".join(cmds))
+                f.write("\r\necho Environment ready!")
+                f.write(
+                    "\r\necho To activate, run: {}\\Scripts\\activate.bat".format(env_name))
+                f.write("\r\npause")
 
 def initialize_git(project_path, config):
     """Initialize Git repository in project directory"""
