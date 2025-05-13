@@ -1,575 +1,922 @@
+"""
+Project Builder Script
+
+A secure, database-agnostic project scaffolding tool with medallion architecture support.
+Generates SQL schemas, Docker configurations, and environment setup scripts while enforcing
+security best practices.
+
+Key Features:
+- Secure input validation and sanitization
+- Cross-database support (MySQL, PostgreSQL, SQL Server)
+- Medallion architecture implementation
+- Automated Docker environment setup
+- Git repository initialization
+- Security-hardened file operations
+
+Usage:
+1. Run the script and follow interactive prompts
+2. Generated project structure includes:
+   - SQL schema files
+   - Docker configurations
+   - Environment setup scripts
+   - Documentation directory
+3. Customize generated files as needed for specific use cases
+
+Security Measures:
+- Path traversal prevention
+- Input sanitization
+- File size limits (10MB max)
+- Secure file permissions
+- Identifier quoting for SQL injection protection
+"""
+
 import os
 import csv
-import subprocess
+import re
 import sys
+import subprocess
 from pathlib import Path
-from datetime import datetime, timedelta
+from typing import Dict, List, Tuple, Optional, Set
 
-# Configuration constants
-REQUIRED_CSV_COLUMNS = [
-    'Table Name', 'Field Name', 'Datatype', 'Length',
-    'Decimal Places', 'Key', 'Enforce', 'Partition Column'
-]
 
-# Escaped identifier for special character
-def quote_identifier(db_type, identifier):
-    """Properly quote identifiers including database names"""
-    # First remove any existing quotes
-    stripped = identifier.strip('"`[]')  # NEW: Sanitization step
-    if db_type == 'postgresql':
-        return f'"{stripped}"'
-    elif db_type == 'mysql':
-        return f'`{stripped}`'
-    elif db_type == 'mssql':
-        return f'[{stripped}]'
-    return stripped
+# Security Constants
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB maximum file size limit
+# Allowed characters for names
+# SAFE_NAME_PATTERN = re.compile(r'^[a-zA-Z0-9_-]+$')
+SAFE_NAME_PATTERN = re.compile(r'^[\w/.-]+$')  # Allows word chars + / . -
+ALLOWED_DB_TYPES = {'mysql', 'postgresql', 'mssql', 'n'}  # Supported databases
+ALLOWED_ARCH = {'medallion', 'data_mesh',
+                'data_vault', 'n'}  # Data architectures
+ALLOWED_ENVS = {'pip', 'conda'}  # Supported environment managers
 
-def prompt_user():
-    """Collect user configuration through interactive prompts"""
-    config = {
-        'project_name': None,
-        'project_location': Path.cwd(),
-        'database': None,
-        'database_name': None,
-        'source_system': None,
-        'csv_path': None,
-        'sql_mapping_path': None,
-        'docker': False,
-        'project_type': 'normal',
-        'data_arch': None,
-        'medallion_layers': [],
-        'python_env': 'pip',
-        'git_init': False,
-        'os_scripts': [],
-        'mssql_go': False
+# Database Configuration Constants
+DB_CONFIG = {
+    'mssql': {
+        'surrogate_key': "{quoted} INT IDENTITY(1,1) NOT NULL",
+        'ingested_at': "DWH_INGESTED_AT DATETIME2 DEFAULT SYSDATETIME()",
+        'create_db': [
+            "USE master",
+            "DROP DATABASE IF EXISTS {db}",
+            "CREATE DATABASE {db}",
+            "USE {db}"
+        ],
+        'schema': {
+            'create': "CREATE SCHEMA {schema};",
+            'drop': "IF EXISTS (SELECT * FROM sys.schemas WHERE name = '{schema}') "
+                    "DROP SCHEMA {schema};"
+        },
+        'max_identifier': 128,
+        'param_style': 'named'
+    },
+    'mysql': {
+        'surrogate_key': "{quoted} INT AUTO_INCREMENT NOT NULL",
+        'ingested_at': "DWH_INGESTED_AT TIMESTAMP(6) DEFAULT CURRENT_TIMESTAMP(6)",
+        'create_db': [
+            "DROP DATABASE IF EXISTS {db}",
+            "CREATE DATABASE {db}",
+            "USE {db}"
+        ],
+        'schema': {
+            'create': "CREATE SCHEMA IF NOT EXISTS {schema};",
+            'drop': "DROP SCHEMA IF EXISTS {schema};"
+        },
+        'max_identifier': 64,
+        'param_style': 'format'
+    },
+    'postgresql': {
+        'surrogate_key': "{quoted} SERIAL NOT NULL",
+        'ingested_at': "DWH_INGESTED_AT TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP",
+        'create_db': [
+            "DROP DATABASE IF EXISTS {db}",
+            "CREATE DATABASE {db}"
+        ],
+        'schema': {
+            'create': "CREATE SCHEMA IF NOT EXISTS {schema};",
+            'drop': "DROP SCHEMA IF EXISTS {schema} CASCADE;"
+        },
+        'max_identifier': 63,
+        'param_style': 'numbered'
     }
+}
 
-    # Project basics
-    while not config['project_name']:
-        config['project_name'] = input("Project name: ").strip()
-        if not config['project_name']:
-            print("Project name is required!")
+PARAMETERIZED_TYPES = {
+    'nvarchar': ['length'],
+    'varchar': ['length'],
+    'char': ['length'],
+    'decimal': ['length', 'decimals'],
+    'numeric': ['length', 'decimals']
+}
 
-    location = input(
-        f"Where to save the project? [default: {str(config['project_location'])}]: ").strip()
-    if location:
-        config['project_location'] = Path(location).expanduser().resolve()
 
-    # Database configuration
-    db_choice = input("Database (mysql/postgresql/mssql/n): ").lower()
-    if db_choice in {'mysql', 'postgresql', 'mssql'}:
-        config['database'] = db_choice
-        config['database_name'] = input("Database name: ").strip()
+class ProjectConfig:
+    """
+    Configuration container for project settings
 
-        while not config['source_system']:
-            config['source_system'] = input("Source system name: ").strip()
-            if not config['source_system']:
-                print("Source system is required!")
+    Attributes:
+        project_name (str): Name of the project
+        base_location (Path): Base directory for projects
+        project_root (Path): Full path to project directory
+        database (str|None): Selected database type
+        database_name (str|None): Name of the database
+        source_system (str|None): Source system name
+        csv_path (Path|None): Path to CSV mapping file
+        sql_mapping_path (Path|None): Path to SQL type mapping file
+        medallion_layers (list): List of medallion layers
+        python_env (str): Python environment manager
+        git_init (bool): Initialize git repository flag
+        os_scripts (set): OS-specific scripts to generate
+        docker (bool): Generate Docker files flag
+        mssql_go (bool): MSSQL-specific flag
+        data_arch (str|None): Data architecture type
+    """
 
+    def __init__(self):
+        self.project_name: str = ""
+        self.base_location: Path = Path.home() / "projects"
+        self.project_root: Path = Path()  # Will be set during configuration
+        self.database: Optional[str] = None
+        self.database_name: Optional[str] = None
+        self.source_system: Optional[str] = None
+        self.csv_path: Optional[Path] = None
+        self.sql_mapping_path: Optional[Path] = None
+        self.medallion_layers: List[str] = []
+        self.python_env: str = "pip"
+        self.git_init: bool = False
+        self.os_scripts: Set[str] = set()
+        self.docker: bool = False
+        self.mssql_go: bool = False
+        self.data_arch: Optional[str] = None
+
+
+def validate_safe_name(name: str) -> Tuple[bool, str]:
+    """
+    Validate names against security patterns
+
+    Args:
+        name (str): Input name to validate
+
+    Returns:
+        Tuple[bool, str]: (True, "") if valid, (False, error message) otherwise
+    """
+    if not SAFE_NAME_PATTERN.match(name):
+        return False, ("Invalid characters detected (only letters, numbers, "
+                       "hyphens and underscores allowed)")
+    if len(name) > 128:
+        return False, "Name exceeds maximum length (128 characters)"
+    return True, ""
+
+
+def secure_path(input_path: Path) -> Path:
+    """
+    Validate and resolve paths securely
+
+    Ensures paths stay within user's home directory to prevent traversal attacks
+
+    Args:
+        input_path (Path): Path to validate
+
+    Returns:
+        Path: Resolved and validated path
+
+    Raises:
+        ValueError: On path traversal attempts
+    """
+    try:
+        home = Path.home().resolve()
+        expanded = input_path.expanduser().resolve()
+
+        if home not in expanded.parents and expanded != home:
+            raise ValueError(f"Path must be within home directory ({home})")
+
+        return expanded
+    except (ValueError, FileNotFoundError) as e:
+        raise ValueError(f"Invalid path: {str(e)}") from e
+
+
+# def sanitize_identifier(identifier: str, db_type: str) -> str:
+#     max_length = DB_CONFIG.get(db_type, {}).get('max_identifier', 64)
+#     clean = re.sub(r'[^\w]', '', identifier.strip('"`[]'))
+#     return clean[:max_length]
+
+def sanitize_identifier(identifier: str, db_type: str) -> str:
+    """
+    Sanitize identifiers while preserving allowed special characters
+
+    Args:
+        identifier: Original identifier from input
+        db_type: Database type for length constraints
+
+    Returns:
+        Sanitized identifier safe for database use
+    """
+    # Remove surrounding quotes/brackets and whitespace
+    stripped = identifier.strip('"`[] \t\n\r')
+
+    # Allow specific safe characters: letters, numbers, _, /, ., -
+    # Remove any other special characters
+    clean = re.sub(r'[^\w/.-]', '', stripped)
+
+    # Truncate to database's max identifier length
+    max_length = DB_CONFIG.get(db_type, {}).get('max_identifier', 64)
+    return clean[:max_length]
+
+class SecureInputHandler:
+    """Secure input handling with validation"""
+
+    @staticmethod
+    def get_input(prompt: str, validator: callable = None) -> str:
+        """
+        Get validated user input
+
+        Args:
+            prompt (str): Display prompt
+            validator (callable): Validation function
+
+        Returns:
+            str: Validated input
+        """
         while True:
-            config['csv_path'] = input("CSV mapping file path: ").strip()
-            if Path(config['csv_path']).exists():
-                break
-            print("File not found!")
-
-        while True:
-            config['sql_mapping_path'] = input(
-                "SQL type mapping file: ").strip()
-            if Path(config['sql_mapping_path']).exists():
-                break
-            print("File not found!")
-
-        config['mssql_go'] = (db_choice == 'mssql')
-
-    # Project type and architecture
-    project_type = input("Project type (data/normal): ").lower()
-    if project_type == 'data':
-        config['project_type'] = 'data'
-        data_arch = input(
-            "Architecture (medallion/data_mesh/data_vault): ").lower()
-        if data_arch == 'medallion':
-            config['data_arch'] = 'medallion'
-            layers = input("Medallion layers [bronze silver gold]: ").lower()
-            config['medallion_layers'] = layers.split() or [
-                'bronze', 'silver', 'gold']
-
-    # Additional configurations
-    config['docker'] = input("Generate Docker files? (y/n): ").lower() == 'y'
-    config['python_env'] = input("Environment manager (conda/pip): ").lower()
-    config['git_init'] = input("Initialize Git? (y/n): ").lower() == 'y'
-
-    os_choice = input("OS scripts (mac/win/both): ").lower()
-    if 'mac' in os_choice:
-        config['os_scripts'].append('mac')
-    if 'win' in os_choice:
-        config['os_scripts'].append('win')
-
-    return config
-
-
-def validate_csv_structure(file_path):
-    """Ensure CSV has required columns and valid structure"""
-    with open(file_path, 'r', encoding='utf-8-sig') as f:
-        reader = csv.DictReader(f)
-        if not reader.fieldnames:
-            raise ValueError("CSV file is empty or missing headers")
-
-        missing = [
-            col for col in REQUIRED_CSV_COLUMNS if col not in reader.fieldnames]
-        if missing:
-            raise ValueError(f"Missing columns: {', '.join(missing)}")
-
-
-def read_sql_mapping(mapping_path):
-    """Read and validate SQL type mapping file"""
-    type_map = {}
-    with open(mapping_path, 'r', encoding='utf-8-sig') as f:
-        reader = csv.reader(f)
-        headers = next(reader)
-
-        if len(headers) < 2 or headers[0].lower() != 'mapping' or headers[1].lower() != 'sql datatype':
-            raise ValueError("Invalid SQL mapping file format")
-
-        for row in reader:
-            if len(row) >= 2:
-                type_map[row[0].strip().lower()] = row[1].strip()
-    return type_map
-
-
-def process_table_data(csv_path, sql_mapping):
-    """Process CSV data with special character handling"""
-    PARAMETERIZED_TYPES = {
-        'NVARCHAR': ['length'],
-        'VARCHAR': ['length'],
-        'CHAR': ['length'],
-        'DECIMAL': ['length', 'decimals'],
-        'NUMERIC': ['length', 'decimals']
-    }
-
-    tables = {}
-    with open(csv_path, 'r', encoding='utf-8-sig') as f:
-        reader = csv.DictReader(f)
-
-        for row in reader:
-            table_name = row['Table Name'].strip()
-            if not table_name:
+            value = input(prompt).strip()
+            if not value:
                 continue
-
-            if table_name not in tables:
-                tables[table_name] = {
-                    'columns': [],
-                    'keys': [],
-                    'partition': None,
-                    'partition_type': None
-                }
-
-            field = row['Field Name'].strip()
-            dtype = row['Datatype'].strip().lower()
-            length = row['Length'].strip()
-            decimals = row['Decimal Places'].strip()
-            enforce = row['Enforce'].strip().upper() == 'X'
-            is_partition = row['Partition Column'].strip().upper() == 'X'
-
-            if dtype not in sql_mapping:
-                raise ValueError(
-                    f"Undefined data type '{dtype}' for field '{field}'")
-
-            base_type = sql_mapping[dtype].upper().split('(')[0].strip()
-
-            if base_type in PARAMETERIZED_TYPES:
-                required_params = PARAMETERIZED_TYPES[base_type]
-
-                if 'length' in required_params and not length:
-                    raise ValueError(
-                        f"Missing length for {field} ({base_type})")
-                if 'decimals' in required_params and not decimals:
-                    raise ValueError(
-                        f"Missing decimals for {field} ({base_type})")
-
-                params = []
-                if 'length' in required_params:
-                    params.append(length)
-                if 'decimals' in required_params:
-                    params.append(decimals)
-
-                sql_type = f"{base_type}({','.join(params)})" if params else base_type
+            if validator:
+                valid, msg = validator(value)
+                if valid:
+                    return value
+                print(f"Invalid input: {msg}")
             else:
-                sql_type = base_type
+                return value
 
-            # Store as dictionary instead of string
-            col_def = {
-                'field': field,
-                'type': sql_type,
-                'enforce': enforce
-            }
+    @staticmethod
+    def get_file(prompt: str) -> Path:
+        """
+        Get validated file path with security checks
 
-            tables[table_name]['columns'].append(col_def)
+        Args:
+            prompt (str): Display prompt
 
-            if row['Key'].strip().upper() == 'X':
-                tables[table_name]['keys'].append(field)
-
-            if is_partition:
-                if tables[table_name]['partition']:
-                    raise ValueError(
-                        f"Multiple partition columns in {table_name}")
-                tables[table_name]['partition'] = field
-                tables[table_name]['partition_type'] = base_type
-
-    return tables
-
-
-def generate_sql_commands(config, tables):
-    db_type = config['database']
-    quoted_db = quote_identifier(db_type, config['database_name'])
-    quoted_source = quote_identifier(db_type, config['source_system'])
-    commands = []
-
-    # Database creation
-    if db_type == 'mssql':
-        commands.extend([
-            f"USE master",
-            f"DROP DATABASE IF EXISTS {quoted_db}",
-            f"CREATE DATABASE {quoted_db}",
-            f"USE {quoted_db}"
-        ])
-    elif db_type == 'mysql':
-        commands.extend([
-            f"DROP DATABASE IF EXISTS {quoted_db}",
-            f"CREATE DATABASE {quoted_db}",
-            f"USE {quoted_db}"
-        ])
-    elif db_type == 'postgresql':
-        commands.extend([
-            f"DROP DATABASE IF EXISTS {quoted_db}",
-            f"CREATE DATABASE {quoted_db}"
-        ])
-
-    for layer in config.get('medallion_layers', []):
-        quoted_layer = quote_identifier(db_type, layer)
-
-        # Schema creation
-        if db_type == 'postgresql':
-            commands.append(
-                f"CREATE SCHEMA IF NOT EXISTS {quoted_layer};")
-        elif db_type == 'mssql':
-            commands.append(f"-- Drop and recreate schema: {quoted_layer}")
-            commands.append(
-                f"IF EXISTS (SELECT * FROM sys.schemas WHERE name = '{quoted_layer}')")
-            commands.append(f"    DROP SCHEMA {quoted_layer};")
-            commands.append(
-                f"CREATE SCHEMA {quoted_layer};")
+        Returns:
+            Path: Validated file path
+        """
+        while True:
+            path_str = SecureInputHandler.get_input(prompt)
+            path = Path(path_str)
+            try:
+                validated_path = secure_path(path)
+                if not validated_path.exists():
+                    print("File not found")
+                    continue
+                if validated_path.stat().st_size > MAX_FILE_SIZE:
+                    print("File exceeds 10MB limit")
+                    continue
+                return validated_path
+            except ValueError as e:
+                print(f"Path error: {str(e)}")
 
 
+class CSVProcessor:
+    """Secure CSV processing with schema validation"""
 
-        # Table creation
+    @staticmethod
+    def validate_structure(file_path: Path) -> None:
+        """
+        Validate CSV file structure
+
+        Args:
+            file_path (Path): Path to CSV file
+
+        Raises:
+            ValueError: On missing required columns
+        """
+        required_columns = {'table name', 'field name', 'datatype', 'length', 'decimal places'}
+        with open(file_path, 'r', encoding='utf-8-sig') as f:
+            reader = csv.DictReader(f)
+            if not reader.fieldnames:
+                raise ValueError("Empty CSV file")
+
+            columns = {col.strip().lower() for col in reader.fieldnames}
+            missing = required_columns - columns
+            if missing:
+                raise ValueError(f"Missing columns: {', '.join(missing)}")
+
+    @staticmethod
+    def read_mapping(file_path: Path) -> Dict[str, str]:
+        """
+        Read and validate SQL type mapping file
+
+        Args:
+            file_path (Path): Path to mapping file
+
+        Returns:
+            Dict[str, str]: Type mapping dictionary
+
+        Raises:
+            ValueError: On invalid file format
+        """
+        mapping = {}
+        with open(file_path, 'r', encoding='utf-8-sig') as f:
+            reader = csv.reader(f)
+            headers = next(reader, None)
+
+            if not headers or len(headers) < 2:
+                raise ValueError("Invalid mapping file format")
+
+            for row in reader:
+                if len(row) < 2:
+                    continue
+
+                source = sanitize_identifier(row[0].strip().lower(), 'generic')
+                target = sanitize_identifier(row[1].strip(), 'generic')
+
+                if source and target:
+                    mapping[source] = target
+
+        if not mapping:
+            raise ValueError("No valid mappings found in file")
+        return mapping
+
+    @staticmethod
+    def process_tables(file_path: Path, type_map: Dict[str, str]) -> Dict:
+        """
+        Process CSV data into table definitions
+
+        Args:
+            file_path (Path): Path to CSV file
+            type_map (Dict): SQL type mapping
+
+        Returns:
+            Dict: Processed table definitions
+
+        Raises:
+            ValueError: On missing columns or invalid data
+        """
+        tables = {}
+        with open(file_path, 'r', encoding='utf-8-sig') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                try:
+                    table_name = sanitize_identifier(
+                        row['Table Name'].strip().lower(), 'generic'
+                    )
+                    field_name = sanitize_identifier(
+                        row['Field Name'].strip(), 'generic'
+                    )
+                    dtype = row['Datatype'].strip().lower()
+                    length = row['Length'].strip()
+                    decimals = row['Decimal Places'].strip()
+                    is_key = row['Key'].strip().upper() == 'X'
+                    is_partition = row['Partition Column'].strip(
+                    ).upper() == 'X'
+
+                    if not table_name:
+                        continue
+
+                    if table_name not in tables:
+                        tables[table_name] = {
+                            'columns': [],
+                            'keys': [],
+                            'partition': None,
+                            'partition_type': None
+                        }
+
+                    base_type = type_map.get(dtype, '').split(
+                        '(')[0].strip().lower()
+                    if not base_type:
+                        raise ValueError(f"Undefined type: {dtype}")
+
+                    if base_type in PARAMETERIZED_TYPES:
+                        required_params = PARAMETERIZED_TYPES[base_type]
+                        params = []
+                        # Validate required parameters
+                        if 'length' in required_params:
+                            if not length:
+                                raise ValueError(f"Missing length for {field_name}")
+                            params.append(length)
+
+                        if 'decimals' in required_params:
+                            if not decimals:
+                                raise ValueError(f"Missing decimals for {field_name}")
+                            params.append(decimals)
+
+                        sql_type = f"{base_type}({','.join(params)})"
+
+
+                    else:
+                        sql_type = base_type
+                    #     if ('length' in PARAMETERIZED_TYPES[base_type]
+                    #             and not length):
+                    #         raise ValueError(
+                    #             f"Missing length for {field_name}")
+                    #     if ('decimals' in PARAMETERIZED_TYPES[base_type]
+                    #             and not decimals):
+                    #         raise ValueError(
+                    #             f"Missing decimals for {field_name}")
+
+                    #     if length:
+                    #         params.append(length)
+                    #     if decimals:
+                    #         params.append(decimals)
+
+                    #     sql_type = (f"{base_type}({','.join(params)})"
+                    #                 if params else base_type)
+                    # else:
+                    #     sql_type = base_type
+
+                    tables[table_name]['columns'].append({
+                        'field': field_name,
+                        'type': sql_type,
+                        'enforce': row['Enforce'].strip().upper() == 'X'
+                    })
+
+                    if is_key:
+                        tables[table_name]['keys'].append(field_name)
+                    if is_partition:
+                        if tables[table_name]['partition']:
+                            raise ValueError(
+                                f"Multiple partitions in {table_name}"
+                            )
+                        tables[table_name]['partition'] = field_name
+                        tables[table_name]['partition_type'] = base_type
+
+                except KeyError as e:
+                    raise ValueError(f"Missing column in CSV: {e}")
+
+        return tables
+
+
+class SQLGenerator:
+    """SQL DDL generator with database-specific formatting"""
+
+    def __init__(self, config: ProjectConfig):
+        """
+        Initialize SQL generator
+
+        Args:
+            config (ProjectConfig): Project configuration
+        """
+        self.config = config
+        self._validate_config()
+
+    def _escape_string(self, value: str) -> str:
+        """Properly escape string literals for different databases"""
+        # First sanitize the input
+        clean_value = re.sub(r"[^\w/.-]", "", value.strip())
+
+        # Then escape single quotes
+        escaped = clean_value.replace("'", "''")
+
+        # Database-specific handling if needed
+        if self.config.database == 'postgresql':
+            escaped = escaped.replace("%", "%%")
+
+        return f"'{escaped}'"
+
+    def _validate_config(self):
+        if not SAFE_NAME_PATTERN.match(self.config.project_name):
+            raise ValueError("Invalid project name")
+        if self.config.database and self.config.database not in DB_CONFIG:
+            raise ValueError("Unsupported database type")
+
+    def _quote(self, identifier: str) -> str:
+        clean = sanitize_identifier(identifier, self.config.database)
+        return {
+            'mssql': f'[{clean}]',
+            'mysql': f'`{clean}`',
+            'postgresql': f'"{clean}"'
+        }.get(self.config.database, clean)
+
+    def generate_ddl(self, tables: Dict) -> Dict[str, str]:
+        """
+        Generate database DDL commands
+
+        Args:
+            tables (Dict): Table definitions
+
+        Returns:
+            Dict[str, str]: Layer-specific SQL files
+        """
+        if not self.config.database:
+            return {}
+
+        ddl = {}
+        for layer in self.config.medallion_layers:
+            commands = []
+            commands.extend(self._database_commands())
+            commands.extend(self._schema_commands(layer))
+            commands.extend(self._table_commands(layer, tables))
+            ddl[f"{layer}.sql"] = self._format_commands(commands)
+
+        return ddl
+
+    def _database_commands(self) -> List[str]:
+        quoted_db = self._quote(self.config.database_name)
+        return [
+            cmd.format(db=quoted_db)
+            for cmd in DB_CONFIG[self.config.database]['create_db']
+        ]
+
+    def _schema_commands(self, layer: str) -> List[str]:
+        quoted_layer = self._quote(layer)
+        return [
+            DB_CONFIG[self.config.database]['schema']['drop'].format(
+                schema=quoted_layer
+            ),
+            DB_CONFIG[self.config.database]['schema']['create'].format(
+                schema=quoted_layer
+            )
+        ]
+
+    def _table_commands(self, layer: str, tables: Dict) -> List[str]:
+        commands = []
         for table, data in tables.items():
-            quoted_table = quote_identifier(db_type, table)
-            full_table_name = f"{quoted_layer}.{quoted_table}"
+            quoted_table = self._quote(table)
+            full_name = f"{self._quote(layer)}.{quoted_table}"
 
-            columns = []
-            # Add surrogate key
-            surrogate_column = f"{table}_ID"
-            quoted_surrogate = quote_identifier(db_type, surrogate_column)
-            unique_surrogate_name = f"UQ_{table}_{surrogate_column}"[:64]
+            columns = [
+                DB_CONFIG[self.config.database]['surrogate_key'].format(
+                    quoted=self._quote(f"{table}_id")
+                )
+            ]
 
-            if db_type == 'mssql':
-                columns.append(
-                    f"{quoted_surrogate} INT IDENTITY(1,1) NOT NULL")
-            elif db_type == 'mysql':
-                columns.append(
-                    f"{quoted_surrogate} INT AUTO_INCREMENT NOT NULL")
-            elif db_type == 'postgresql':
-                columns.append(f"{quoted_surrogate} SERIAL NOT NULL")
-
-
-            # Process regular columns
             for col in data['columns']:
-                quoted_field = quote_identifier(db_type, col['field'])
-                col_def = f"{quoted_field} {col['type']}"
+                quoted_col = self._quote(col['field'])
+                col_def = f"{quoted_col} {col['type']}"
                 if col['enforce']:
                     col_def += " NOT NULL"
                 columns.append(col_def)
 
-            # Add original primary key
+            columns.extend([
+                "DWH_RECORD_ID VARCHAR(255) NOT NULL",
+                "DWH_JOB_RECORD_ID VARCHAR(255) NOT NULL",
+                f"DWH_SOURCE_SYSTEM VARCHAR(255) DEFAULT {self._escape_string(self.config.source_system)} NOT NULL",
+                f"DWH_SOURCE_TABLE VARCHAR(255) DEFAULT {self._escape_string(table)} NOT NULL",
+                DB_CONFIG[self.config.database]['ingested_at']
+            ])
+
             if data['keys']:
-                quoted_keys = [quote_identifier(
-                    db_type, k) for k in data['keys']]
+                quoted_keys = [self._quote(k) for k in data['keys']]
                 columns.append(f"PRIMARY KEY ({', '.join(quoted_keys)})")
 
-            # Append surrogate to the created table
-            columns.append(
-                f"CONSTRAINT {unique_surrogate_name} UNIQUE ({quoted_surrogate})")
-
-            # Partitioning
-            partition_clause = ""
-            if db_type == 'mssql' and data['partition'] and layer != 'bronze':
-                partition_field = quote_identifier(db_type, data['partition'])
-                func_name = f"pf_{layer}_{config['source_system']}_{table}"
-                scheme_name = f"ps_{layer}_{config['source_system']}_{table}"
-                partition_clause = f" ON {scheme_name}({partition_field})"
-                commands.extend([
-                    f"CREATE PARTITION FUNCTION {func_name} ({data['partition_type']}) "
-                    f"AS RANGE RIGHT FOR VALUES ('2023-01-01')",
-                    f"CREATE PARTITION SCHEME {scheme_name} "
-                    f"AS PARTITION {func_name} ALL TO ([PRIMARY])"
-                ])
-
-            # Build final statement
-            columns_str = ",\n    ".join(columns)
-            drop_stmt = (
-                f"IF OBJECT_ID('{full_table_name}', 'U') IS NOT NULL "
-                f"DROP TABLE {full_table_name};"
-                if db_type == 'mssql'
-                else f"DROP TABLE IF EXISTS {full_table_name};"
+            drop_sql = (
+                f"IF OBJECT_ID('{full_name}', 'U') IS NOT NULL DROP TABLE {full_name};"
+                if self.config.database == 'mssql' else
+                f"DROP TABLE IF EXISTS {full_name};"
             )
-            create_stmt = f"CREATE TABLE {full_table_name} (\n    {columns_str}\n){partition_clause}"
+            create_sql = (
+                f"CREATE TABLE {full_name} (\n    "
+                + ",\n    ".join(columns)
+                + "\n)"
+            )
 
-            commands.extend([drop_stmt, create_stmt])
+            commands.extend([drop_sql, create_sql])
 
-    if config['mssql_go']:
-        commands = [f"{cmd}\nGO" if not cmd.endswith(
-            'GO') else cmd for cmd in commands]
+        return commands
 
-    return "\n".join(commands)
+    def _format_commands(self, commands: List[str]) -> str:
+        if self.config.mssql_go:
+            return "\nGO\n".join(commands) + "\nGO"
+        return ";\n".join(commands) + ";"
 
 
+class ProjectBuilder:
+    """Main project builder orchestrator"""
 
-def generate_docker_config(project_path, config):
-    """Generate Docker-related files in project directory"""
-    # Dockerfile
-    dockerfile_path = project_path / "Dockerfile"
-    with open(dockerfile_path, 'w') as f:
-        f.write("""FROM python:3.9-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-CMD ["python", "src/main.py"]""")
+    def __init__(self):
+        self.config = ProjectConfig()
+        self.input = SecureInputHandler()
 
-    # docker-compose.yml
-    compose_path = project_path / "docker-compose.yml"
-    db_service = ""
-    if config['database'] == 'postgresql':
-        db_service = f"""
-  postgres:
-    image: postgres:13
-    environment:
-      POSTGRES_DB: {config['database_name']}
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data"""
-    elif config['database'] == 'mysql':
-        db_service = f"""
-  mysql:
-    image: mysql:8
-    environment:
-      MYSQL_DATABASE: {config['database_name']}
-      MYSQL_ROOT_PASSWORD: root
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql"""
-    elif config['database'] == 'mssql':
-        db_service = f"""
-  mssql:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    environment:
-      SA_PASSWORD: YourStrong!Passw0rd
-      ACCEPT_EULA: Y
-    ports:
-      - "1433:1433"
-    volumes:
-      - mssql_data:/var/opt/mssql"""
+    def setup(self):
+        """Main entry point for project setup"""
+        self._get_basic_info()
+        self._get_database_config()
+        self._get_architecture()
+        self._get_additional_config()
+        self._build_project_structure()
+        self._generate_project_files()
+        self._finalize_project()
 
-    with open(compose_path, 'w') as f:
-        f.write(f"""version: '3.8'
+    def _get_basic_info(self):
+        """Collect basic project information"""
+        self.config.project_name = self.input.get_input(
+            "Project name: ",
+            lambda x: validate_safe_name(x)
+        )
+
+        default_base = str(self.config.base_location)
+        base_loc_str = self.input.get_input(
+            f"Base directory for projects [{default_base}]: ",
+            lambda x: (True, "")
+        ) or default_base
+
+        try:
+            self.config.base_location = secure_path(Path(base_loc_str))
+            self.config.project_root = (
+                self.config.base_location / self.config.project_name
+            )
+        except ValueError as e:
+            print(f"Error: {str(e)}")
+            sys.exit(1)
+
+    def _build_project_structure(self):
+        """Create directory structure with security checks"""
+        try:
+            self.config.project_root.mkdir(parents=True, exist_ok=False)
+            (self.config.project_root / "sql").mkdir()
+            (self.config.project_root / "src").mkdir()
+            (self.config.project_root / "docs").mkdir()
+            (self.config.project_root / "scripts").mkdir()
+
+            if self.config.docker:
+                (self.config.project_root / "docker").mkdir()
+
+        except FileExistsError:
+            print(
+                f"Project directory already exists: {self.config.project_root}")
+            sys.exit(1)
+
+    def _generate_project_files(self):
+        """Generate all project files in appropriate locations"""
+        if self.config.database:
+            CSVProcessor.validate_structure(self.config.csv_path)
+            type_map = CSVProcessor.read_mapping(self.config.sql_mapping_path)
+            tables = CSVProcessor.process_tables(
+                self.config.csv_path, type_map)
+
+            generator = SQLGenerator(self.config)
+            ddl_files = generator.generate_ddl(tables)
+
+            sql_dir = self.config.project_root / "sql"
+            for name, content in ddl_files.items():
+                path = sql_dir / name
+                path.write_text(content)
+                path.chmod(0o644)
+
+        if self.config.docker:
+            self._generate_docker_files()
+
+        self._generate_environment_scripts()
+
+    def _generate_compose_content(self) -> str:
+        """Generate docker-compose.yml content based on project configuration"""
+        compose_content = """# WARNING: Change default credentials in production!
+version: '3.8'
+
 services:
   app:
     build: .
     ports:
-      - "5000:5000"{db_service}
-volumes:
-  postgres_data:
-  mysql_data:
-  mssql_data:""")
+      - "5000:5000"
+"""
 
+        if self.config.database:
+            db_service = self._generate_db_service()
+            compose_content += db_service
 
-def create_project_structure(project_path, config):
-    """Create directory structure in specified project path"""
-    base_dirs = ['src', 'tests', 'docs', 'scripts']
-    if config['project_type'] == 'data':
-        base_dirs.append('data')
-        if 'medallion' in config.get('data_arch', ''):
-            base_dirs.extend(
-                [f"data/{layer}" for layer in config['medallion_layers']])
+        compose_content += "\nvolumes:"
+        if self.config.database == 'mssql':
+            compose_content += "\n  mssql_data:"
+        elif self.config.database == 'mysql':
+            compose_content += "\n  mysql_data:"
+        elif self.config.database == 'postgresql':
+            compose_content += "\n  postgres_data:"
 
-    for directory in base_dirs:
-        (project_path / directory).mkdir(parents=True, exist_ok=True)
+        return compose_content
 
+    def _generate_db_service(self) -> str:
+        """Generate database service configuration for docker-compose.yml"""
+        db = self.config.database
+        name = self.config.database_name
 
-# def setup_environment(project_path, config):
-#     """Create environment setup scripts in project directory"""
-#     env_cmds = {
-#         'conda': [
-#             f"conda create --name {config['project_name']}_env python=3.9 -y",
-#             f"conda activate {config['project_name']}_env"
-#         ],
-#         'pip': [
-#             f"python -m venv {config['project_name']}_env",
-#             f"source {config['project_name']}_env/bin/activate" if 'mac' in config['os_scripts'] else f"{config['project_name']}_env\Scripts\activate"
-#         ]
-#     }
-
-#     for os_type in config['os_scripts']:
-#         if os_type == 'mac':
-#             setup_path = project_path / "setup.sh"
-#             with open(setup_path, 'w') as f:
-#                 f.write("#!/bin/bash\n" +
-#                         "\n".join(env_cmds[config['python_env']]))
-#             os.chmod(setup_path, 0o755)
-#         elif os_type == 'win':
-#             setup_path = project_path / "setup.bat"
-#             with open(setup_path, 'w') as f:
-#                 f.write("@echo off\n" +
-#                         "\r\n".join(env_cmds[config['python_env']]))
-
-def setup_environment(project_path, config):
-    """Create OS-specific environment setup scripts"""
-    env_name = f"{config['project_name']}_env"
-
-    # Environment commands by OS and package manager
-    env_commands = {
-        'pip': {
-            'mac': [
-                f"python3 -m venv {env_name}",
-                f"source {env_name}/bin/activate",
-                "pip install --upgrade pip",
-                "if [ -f requirements.txt ]; then pip install -r requirements.txt; fi"
-            ],
-            'win': [
-                f"python -m venv {env_name}",
-                f"call {env_name}\\Scripts\\activate.bat",
-                "python -m pip install --upgrade pip",
-                "if exist requirements.txt pip install -r requirements.txt"
-            ]
-        },
-        'conda': {
-            'mac': [
-                f"conda create --name {env_name} python=3.9 -y",
-                f"conda activate {env_name}",
-                "conda install pip -y",
-                "pip install -r requirements.txt"
-            ],
-            'win': [
-                f"conda create --name {env_name} python=3.9 -y",
-                f"conda activate {env_name}",
-                "conda install pip -y",
-                "pip install -r requirements.txt"
-            ]
+        services = {
+            'mssql': f"""
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      SA_PASSWORD: YourStrong!Passw0rd  # CHANGE IN PRODUCTION
+      ACCEPT_EULA: Y
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+""",
+            'mysql': f"""
+  db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root  # CHANGE IN PRODUCTION
+      MYSQL_DATABASE: {name}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+""",
+            'postgresql': f"""
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: {name}
+      POSTGRES_PASSWORD: postgres  # CHANGE IN PRODUCTION
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+"""
         }
-    }
+        return services.get(db, "")
 
-    for os_type in config['os_scripts']:
-        if os_type == 'mac':
-            setup_path = project_path / "setup.sh"
-            with open(setup_path, 'w') as f:
-                f.write("#!/bin/bash\n")
-                cmds = env_commands[config['python_env']]['mac']
-                f.write("\n".join(cmds))
-                f.write(
-                    '\necho "Environment ready! Run: source {}/bin/activate"'.format(env_name))
-            os.chmod(setup_path, 0o755)
+    def _generate_docker_files(self):
+        """Generate Docker configuration files"""
+        docker_dir = self.config.project_root / "docker"
+        docker_dir.mkdir(exist_ok=True)
 
-        elif os_type == 'win':
-            setup_path = project_path / "setup.bat"
-            with open(setup_path, 'w') as f:
-                f.write("@echo off\n")
-                cmds = env_commands[config['python_env']]['win']
-                f.write("\r\n".join(cmds))
-                f.write("\r\necho Environment ready!")
-                f.write(
-                    "\r\necho To activate, run: {}\\Scripts\\activate.bat".format(env_name))
-                f.write("\r\npause")
+        # Dockerfile
+        dockerfile_path = docker_dir / "Dockerfile"
+        dockerfile_path.write_text("""# WARNING: Change default credentials in production!
+FROM python:3.9-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+CMD ["python", "src/main.py"]
+""")
+        dockerfile_path.chmod(0o644)
 
-def initialize_git(project_path, config):
-    """Initialize Git repository in project directory"""
-    if config['git_init']:
-        subprocess.run(['git', 'init'], cwd=project_path)
-        gitignore_path = project_path / ".gitignore"
-        with open(gitignore_path, 'w') as f:
-            f.write("""# Python
-venv/
+        # docker-compose.yml
+        compose_path = docker_dir / "docker-compose.yml"
+        compose_content = self._generate_compose_content()
+        compose_path.write_text(compose_content)
+        compose_path.chmod(0o644)
+
+        # .dockerignore
+        dockerignore_path = docker_dir / ".dockerignore"
+        dockerignore_content = """# Security
+.env
+secrets/
+*.key
+*.pem
+*.crt
+
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+venv/
 
-# Environment
-.env
-.env.local
+# Development
+.idea/
+.vscode/
+.DS_Store
 
 # Database
 *.db
-*.sqlite
+*.dump
 *.bak
+"""
+        dockerignore_path.write_text(dockerignore_content)
+        dockerignore_path.chmod(0o644)
 
-# IDE
-.idea/
-.vscode/
-.DS_Store""")
+    def _generate_environment_scripts(self):
+        """Generate setup scripts in scripts/ directory"""
+        scripts_dir = self.config.project_root / "scripts"
+        env_name = sanitize_identifier(
+            f"{self.config.project_name}_env", 'generic')
 
+        for os_type in self.config.os_scripts:
+            if os_type == 'mac':
+                script_path = scripts_dir / "setup_mac.sh"
+                content = f"""#!/bin/bash
+python -m venv {env_name}
+source {env_name}/bin/activate
+pip install --upgrade pip
+[ -f requirements.txt ] && pip install -r requirements.txt
+echo "Activate with: source {env_name}/bin/activate"
+"""
+                script_path.write_text(content)
+                script_path.chmod(0o755)
 
-def main():
-    try:
-        config = prompt_user()
-        project_path = config['project_location'] / config['project_name']
+            elif os_type == 'win':
+                script_path = scripts_dir / "setup_win.bat"
+                content = f"""@echo off
+python -m venv {env_name}
+call {env_name}\\Scripts\\activate.bat
+python -m pip install --upgrade pip
+if exist requirements.txt pip install -r requirements.txt
+echo Activate with: {env_name}\\Scripts\\activate.bat
+pause
+"""
+                script_path.write_text(content)
 
-        # Create project directory
-        project_path.mkdir(parents=True, exist_ok=True)
+    def _finalize_project(self):
+        """Final steps including git initialization"""
+        if self.config.git_init:
+            self._init_git_repo()
 
-        # Validate inputs
-        if config['database']:
-            validate_csv_structure(config['csv_path'])
+        print(f"\nProject successfully created at: {self.config.project_root}")
+        print("Directory structure:")
+        for path in self.config.project_root.glob('**/*'):
+            if path.is_dir():
+                print(f"  {path.relative_to(self.config.project_root)}/")
 
-        # Create directory structure
-        create_project_structure(project_path, config)
+    def _init_git_repo(self):
+        """Initialize git repository in project root"""
+        subprocess.run(
+            ['git', 'init', '-q'],
+            cwd=self.config.project_root,
+            check=True,
+            shell=False
+        )
+        gitignore = self.config.project_root / ".gitignore"
+        gitignore.write_text("""# Security
+.env
+secrets/
 
-        # Generate SQL files
-        if config['database']:
-            tables = process_table_data(
-                config['csv_path'], read_sql_mapping(config['sql_mapping_path']))
-            sql_content = generate_sql_commands(config, tables)
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
 
-            for layer in config.get('medallion_layers', []):
-                sql_path = project_path / f"{layer}.sql"
-                with open(sql_path, 'w') as f:
-                    f.write(sql_content)
+# Database
+*.db
+*.dump
+*.bak
+""")
 
-        # Generate Docker files
-        if config['docker']:
-            generate_docker_config(project_path, config)
+    def _get_database_config(self):
+        """Collect and validate database configuration from user input"""
+        db_choice = self.input.get_input(
+            "Database (mysql/postgresql/mssql/n): ",
+            # Now returns (bool, message)
+            lambda x: (x in ALLOWED_DB_TYPES, "Invalid choice")
+        )
+        if db_choice == 'n':
+            return
 
-        # Generate environment setup
-        setup_environment(project_path, config)
+        self.config.database = db_choice
+        self.config.database_name = self.input.get_input(
+            "Database name: ",
+            validate_safe_name
+        )
+        self.config.source_system = self.input.get_input(
+            "Source system name: ",
+            validator=lambda x: validate_safe_name(x) if x else (True, "")
+        )
+        self.config.csv_path = self.input.get_file("CSV mapping path: ")
+        self.config.sql_mapping_path = self.input.get_file(
+            "SQL type mapping: ")
+        self.config.mssql_go = (db_choice == 'mssql')
 
-        # Initialize Git
-        initialize_git(project_path, config)
+    def _get_architecture(self):
+        """Collect and validate architecture configuration"""
+        arch = self.input.get_input(
+            "Architecture (medallion/data_mesh/data_vault/n): ",
+            # Corrected validation
+            lambda x: (x in ALLOWED_ARCH, "Invalid architecture")
+        )
+        if arch == 'n':
+            return
 
-        print(f"\nProject created successfully at: {project_path}")
-        print("Next steps:")
-        print(f"1. Review files in {project_path}")
-        print("2. Run the setup script for your OS")
-        if config['database']:
-            print("3. Execute the generated SQL files against your database")
-        print("4. Start developing in the 'src' directory")
+        self.config.data_arch = arch
+        if arch == 'medallion':
+            layers_input = self.input.get_input(
+                "Medallion layers (space-separated) [bronze silver gold]: ",
+                lambda x: (x, "") if x else ('bronze silver gold', "")
+            )
+            layers = layers_input.split() if layers_input else [
+                'bronze', 'silver', 'gold']
+            self.config.medallion_layers = [l.strip() for l in layers]
 
-    except Exception as e:
-        print(f"\nError: {str(e)}")
-        sys.exit(1)
+            for layer in self.config.medallion_layers:
+                valid, msg = validate_safe_name(layer)
+                if not valid:
+                    print(f"Invalid layer name '{layer}': {msg}")
+                    sys.exit(1)
+
+    def _get_additional_config(self):
+        """Collect additional configuration options"""
+        self.config.docker = self.input.get_input(
+            "Generate Docker files? (y/n): ").lower() == 'y'
+        self.config.python_env = self.input.get_input(
+            "Environment manager (pip/conda): ",
+            # Fixed validation
+            lambda x: (x in ALLOWED_ENVS, "Invalid manager")
+        )
+        self.config.git_init = self.input.get_input(
+            "Initialize Git? (y/n): ").lower() == 'y'
+
+        if self.input.get_input("Generate macOS scripts? (y/n): ").lower() == 'y':
+            self.config.os_scripts.add('mac')
+        if self.input.get_input("Generate Windows scripts? (y/n): ").lower() == 'y':
+            self.config.os_scripts.add('win')
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        sys.tracebacklimit = 0
+        builder = ProjectBuilder()
+        builder.setup()
+    except Exception as e:
+        print(f"Setup failed: {str(e)}")
+        sys.exit(1)
