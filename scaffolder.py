@@ -337,111 +337,100 @@ class CSVProcessor:
 
     @staticmethod
     def process_tables(file_path: Path, type_map: Dict[str, str]) -> Dict:
-        """
-        Process CSV data into table definitions
+      """
+      Process CSV data into table definitions with case preservation
 
-        Args:
-            file_path (Path): Path to CSV file
-            type_map (Dict): SQL type mapping
+      Args:
+          file_path (Path): Path to CSV file
+          type_map (Dict): SQL type mapping
 
-        Returns:
-            Dict: Processed table definitions
+      Returns:
+          Dict: Processed table definitions
 
-        Raises:
-            ValueError: On missing columns or invalid data
-        """
-        tables = {}
-        with open(file_path, 'r', encoding='utf-8-sig') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                try:
-                    table_name = sanitize_identifier(
-                        row['Table Name'].strip().lower(), 'generic'
-                    )
-                    field_name = sanitize_identifier(
-                        row['Field Name'].strip(), 'generic'
-                    )
-                    dtype = row['Datatype'].strip().lower()
-                    length = row['Length'].strip()
-                    decimals = row['Decimal Places'].strip()
-                    is_key = row['Key'].strip().upper() == 'X'
-                    is_partition = row['Partition Column'].strip(
-                    ).upper() == 'X'
+      Raises:
+          ValueError: On missing columns or invalid data
+      """
+      tables = {}
+      with open(file_path, 'r', encoding='utf-8-sig') as f:
+          reader = csv.DictReader(f)
+          for row in reader:
+              try:
+                  # Preserve original table name case
+                  table_name = sanitize_identifier(
+                      row['Table Name'].strip(),  # Removed .lower()
+                      'generic'
+                  )
 
-                    if not table_name:
-                        continue
+                  # Preserve original field name case
+                  field_name = sanitize_identifier(
+                      row['Field Name'].strip(),
+                      'generic'
+                  )
 
-                    if table_name not in tables:
-                        tables[table_name] = {
-                            'columns': [],
-                            'keys': [],
-                            'partition': None,
-                            'partition_type': None
-                        }
+                  # Case-insensitive type lookup with case preservation
+                  dtype_input = row['Datatype'].strip()
+                  dtype_lookup = dtype_input.lower()
+                  mapped_type = type_map.get(dtype_lookup, '')
+                  base_type = mapped_type.split('(')[0].strip()  # Preserve mapped case
 
-                    base_type = type_map.get(dtype, '').split(
-                        '(')[0].strip().lower()
-                    if not base_type:
-                        raise ValueError(f"Undefined type: {dtype}")
+                  if not base_type:
+                      raise ValueError(f"Undefined type: {dtype_input}")
 
-                    if base_type in PARAMETERIZED_TYPES:
-                        required_params = PARAMETERIZED_TYPES[base_type]
-                        params = []
-                        # Validate required parameters
-                        if 'length' in required_params:
-                            if not length:
-                                raise ValueError(f"Missing length for {field_name}")
-                            params.append(length)
+                  length = row['Length'].strip()
+                  decimals = row['Decimal Places'].strip()
+                  is_key = row['Key'].strip().upper() == 'X'
+                  is_partition = row['Partition Column'].strip().upper() == 'X'
 
-                        if 'decimals' in required_params:
-                            if not decimals:
-                                raise ValueError(f"Missing decimals for {field_name}")
-                            params.append(decimals)
+                  if not table_name:
+                      continue
 
-                        sql_type = f"{base_type}({','.join(params)})"
+                  if table_name not in tables:
+                      tables[table_name] = {
+                          'columns': [],
+                          'keys': [],
+                          'partition': None,
+                          'partition_type': None
+                      }
 
+                  # Case-insensitive check for parameterized types
+                  normalized_base = base_type.lower()
+                  if normalized_base in PARAMETERIZED_TYPES:
+                      required_params = PARAMETERIZED_TYPES[normalized_base]
+                      params = []
 
-                    else:
-                        sql_type = base_type
-                    #     if ('length' in PARAMETERIZED_TYPES[base_type]
-                    #             and not length):
-                    #         raise ValueError(
-                    #             f"Missing length for {field_name}")
-                    #     if ('decimals' in PARAMETERIZED_TYPES[base_type]
-                    #             and not decimals):
-                    #         raise ValueError(
-                    #             f"Missing decimals for {field_name}")
+                      # Validate required parameters
+                      if 'length' in required_params:
+                          if not length:
+                              raise ValueError(f"Missing length for {field_name}")
+                          params.append(length)
 
-                    #     if length:
-                    #         params.append(length)
-                    #     if decimals:
-                    #         params.append(decimals)
+                      if 'decimals' in required_params:
+                          if not decimals:
+                              raise ValueError(f"Missing decimals for {field_name}")
+                          params.append(decimals)
 
-                    #     sql_type = (f"{base_type}({','.join(params)})"
-                    #                 if params else base_type)
-                    # else:
-                    #     sql_type = base_type
+                      sql_type = f"{base_type}({','.join(params)})"
+                  else:
+                      sql_type = base_type
 
-                    tables[table_name]['columns'].append({
-                        'field': field_name,
-                        'type': sql_type,
-                        'enforce': row['Enforce'].strip().upper() == 'X'
-                    })
+                  tables[table_name]['columns'].append({
+                      'field': field_name,
+                      'type': sql_type,
+                      'enforce': row['Enforce'].strip().upper() == 'X'
+                  })
 
-                    if is_key:
-                        tables[table_name]['keys'].append(field_name)
-                    if is_partition:
-                        if tables[table_name]['partition']:
-                            raise ValueError(
-                                f"Multiple partitions in {table_name}"
-                            )
-                        tables[table_name]['partition'] = field_name
-                        tables[table_name]['partition_type'] = base_type
+                  if is_key:
+                      tables[table_name]['keys'].append(field_name)
+                  if is_partition:
+                      if tables[table_name]['partition']:
+                          raise ValueError(f"Multiple partitions in {table_name}")
+                      tables[table_name]['partition'] = field_name
+                      tables[table_name]['partition_type'] = base_type
 
-                except KeyError as e:
-                    raise ValueError(f"Missing column in CSV: {e}")
+              except KeyError as e:
+                  raise ValueError(f"Missing column in CSV: {e}")
 
-        return tables
+      return tables
 
 
 class SQLGenerator:
